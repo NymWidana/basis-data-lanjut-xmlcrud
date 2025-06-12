@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<users>
+  <user>
+    <id>1</id>
+    <username>john_doe</username>
+    <profile_image>uploads/profiles/john_doe.jpg</profile_image>
+    <email>john@example.com</email>
+    <!-- Add additional user fields as needed -->
+  </user>
+  <!-- More user entries -->
+<user><id>2</id><username>widana</username><email>widan0001@gmail.com</email><password>$2y$10$pltnDiiiNlW7qRycEAjIpe3Y24S6i9LvebcDiTsPxzRTgtfHSRQF6</password><profile_image>uploads/profiles/1749737446_banner.png</profile_image></user></users>

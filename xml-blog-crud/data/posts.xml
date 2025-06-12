@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<posts>
+  <post>
+    <id>1</id>
+    <title>Welcome to My Blog</title>
+    <hero_image>uploads/posts/hero1.jpg</hero_image>
+    <content>This is the first blog post.</content>
+    <author_id>1</author_id>
+    <created_at>2025-06-12</created_at>
+  </post>
+  <post>
+    <id>2</id>
+    <title>new</title>
+    <hero_image>uploads/posts/1749736986_banner.png</hero_image>
+    <content>newww</content>
+    <author_id>1</author_id>
+    <created_at>2025-06-12</created_at>
+  </post>
+    <post>
+    <id>2</id>
+    <title>new</title>
+    <hero_image>uploads/posts/1749736986_banner.png</hero_image>
+    <content>newww</content>
+    <author_id>1</author_id>
+    <created_at>2025-06-12</created_at>
+  </post>
+    <post>
+    <id>2</id>
+    <title>new</title>
+    <hero_image>uploads/posts/1749736986_banner.png</hero_image>
+    <content>newww</content>
+    <author_id>1</author_id>
+    <created_at>2025-06-12</created_at>
+  </post>
+    <post>
+    <id>2</id>
+    <title>new</title>
+    <hero_image>uploads/posts/1749736986_banner.png</hero_image>
+    <content>newww</content>
+    <author_id>1</author_id>
+    <created_at>2025-06-12</created_at>
+  </post>
+    <post>
+    <id>2</id>
+    <title>new</title>
+    <hero_image>uploads/posts/1749736986_banner.png</hero_image>
+    <content>newww</content>
+    <author_id>1</author_id>
+    <created_at>2025-06-12</created_at>
+  </post>
+    <post>
+    <id>2</id>
+    <title>new</title>
+    <hero_image>uploads/posts/1749736986_banner.png</hero_image>
+    <content>newww</content>
+    <author_id>1</author_id>
+    <created_at>2025-06-12</created_at>
+  </post>
+<post><id>3</id><title>sfdgs</title><hero_image>uploads/posts/1749743172_produk2.png</hero_image><content>fdsgdf</content><author_id>2</author_id><created_at>2025-06-12</created_at></post></posts>
