@@ -29,17 +29,10 @@ if (isset($postsXml->post)) {
         }
     }
 }
+include './components/head.php'
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>My Profile</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100 text-gray-900">
+<body class="bg-gray-100">
+  <?php include './components/header.php' ?>
   <main class="container mx-auto p-4">
     <!-- User Information -->
     <div class="flex items-center space-x-4">

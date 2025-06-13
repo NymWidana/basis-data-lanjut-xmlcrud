@@ -17,15 +17,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = "Invalid username or password.";
     }
 }
+include './components/head.php'
 ?>
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>User Login</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
 <body class="bg-gray-100">
   <div class="container mx-auto px-4 py-8">
     <h2 class="text-2xl font-bold mb-4">Login</h2>

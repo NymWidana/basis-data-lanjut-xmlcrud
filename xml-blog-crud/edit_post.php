@@ -45,15 +45,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     header("Location: profile.php");
     exit;
 }
+include './components/head.php'
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Edit Post</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
+
 <body class="bg-gray-100">
+  <?php include './components/header.php' ?>
 <div class="container mx-auto px-4 py-8">
     <h2 class="text-2xl font-bold mb-4">Edit Post</h2>
     <form method="POST" enctype="multipart/form-data" class="space-y-4">

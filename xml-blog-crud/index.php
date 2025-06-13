@@ -52,40 +52,18 @@ if ($page < 1) {
 }
 $startIndex   = ($page - 1) * $postsPerPage;
 $postsToDisplay = array_slice($allPosts, $startIndex, $postsPerPage);
+include './components/head.php'
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>XML Blog</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100 text-gray-900">
-  <!-- Header Section -->
-  <header class="bg-blue-500 p-4 text-white text-center">
-    <h1 class="text-3xl font-bold">XML Based Blog</h1>
-    <div class="mt-2">
-      <?php if (isset($_SESSION['user_id'])): ?>
-          Hello, <?php echo htmlspecialchars($_SESSION['username']); ?> |
-          <a href="profile.php" class="underline">My Profile</a> |
-          <a href="logout.php" class="underline">Logout</a>
-      <?php else: ?>
-          <a href="login.php" class="underline">Login</a> |
-          <a href="create_user.php" class="underline">Register</a>
-      <?php endif; ?>
-    </div>
-  </header>
 
-  <!-- Navigation Bar -->
+<body class="bg-gray-100 text-gray-900">
+  <?php include './components/header.php' ?>
   <nav class="bg-gray-200 p-4 flex justify-center">
-    <a href="index.php" class="mx-2 px-4 py-2 bg-blue-300 rounded hover:bg-blue-400">Home</a>
+    <a href="index.php" class="text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800 flex space-x-1 items-center"><i class="fa-solid fa-house"></i><span>Home</span></a>
     <?php if (isset($_SESSION['user_id'])): ?>
-      <a href="create_post.php" class="mx-2 px-4 py-2 bg-blue-300 rounded hover:bg-blue-400">New Post</a>
+      <a href="create_post.php" class="text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800 flex space-x-1 items-center"><i class="fa-solid fa-plus"></i><span>New Post</span></a>
     <?php endif; ?>
   </nav>
-
+  Hello, <?php echo htmlspecialchars($_SESSION['username']); ?> 
   <!-- Search Bar -->
   <div class="container mx-auto p-4">
     <form method="GET" action="index.php" class="flex items-center space-x-2">
@@ -109,7 +87,7 @@ $postsToDisplay = array_slice($allPosts, $startIndex, $postsPerPage);
             echo '<img src="' . htmlspecialchars($post->hero_image) . '" alt="Hero Image" class="w-full h-auto mb-2 rounded">';
         }
         echo '<p class="mb-2">' . nl2br(htmlspecialchars($post->content)) . '</p>';
-        echo '<p class="text-sm text-gray-500">Posted on ' . htmlspecialchars($post->created_at) . '</p>';
+        echo '<p class="text-sm text-gray-500">Posted on ' . htmlspecialchars($post->created_at) . ' </p>';
         $postId = (string)$post->id;
         if (isset($reviewCounts[$postId])) {
             echo '<p class="text-sm text-gray-700 mb-2">Reviews: ' . $reviewCounts[$postId] . '</p>';

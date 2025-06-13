@@ -34,17 +34,11 @@ if (isset($reviewsXml->review)) {
         }
     }
 }
+include './components/head.php'
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title><?php echo htmlspecialchars($foundPost->title); ?></title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100 text-gray-900">
+
+<body class="bg-gray-100">
+  <?php include './components/header.php' ?>
   <div class="container mx-auto p-4">
     <!-- Blog Post -->
     <article class="bg-white p-6 rounded shadow mb-8">
@@ -65,7 +59,7 @@ if (isset($reviewsXml->review)) {
       <!-- Review Submission Button (Visible If Logged In) -->
       <?php if (isset($_SESSION['user_id'])): ?>
         <div class="mb-4">
-          <a href="create_review.php?post_id=<?php echo urlencode($foundPost->id); ?>" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+          <a href="create_review.php?post_id=<?php echo urlencode($foundPost->id); ?>" class="text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm px-5 py-2.5 text-center me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
             Write a Review
           </a>
         </div>
@@ -98,7 +92,7 @@ if (isset($reviewsXml->review)) {
 
     <!-- Back to Home Link -->
     <div>
-      <a href="index.php" class="text-blue-500 underline">&larr; Back to Home</a>
+      <a href="index.php" class="text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm px-5 py-2.5 text-center me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">&larr; Back to Home</a>
     </div>
   </div>
 </body>

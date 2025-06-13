@@ -37,17 +37,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     header("Location: index.php");
     exit;
 }
+include './components/head.php'
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Create New Post</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100 text-gray-900">
+
+<body class="bg-gray-100">
+  <?php include './components/header.php' ?>
   <div class="container mx-auto p-8">
     <h2 class="text-2xl font-bold mb-4">Create New Post</h2>
     <form method="POST" enctype="multipart/form-data" class="space-y-4">

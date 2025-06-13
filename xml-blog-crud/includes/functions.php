@@ -188,4 +188,18 @@ function deleteReview($reviewId) {
     return false;
 }
 
+function getUserById($id) {
+    $file = 'data/users.xml';
+    $xml = loadXML($file);    foreach ($xml->user as $user) {
+        if ((string) $user->id === (string) $id) {
+            return [
+                'id' => (string) $user->id,
+                'name' => (string) $user->name,
+                'email' => (string) $user->email
+            ];
+        }
+    }
+    return null; // User not found
+}
+
 ?>
