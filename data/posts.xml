@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<posts>
+  <post>
+    <id>1</id>
+    <title>apel</title>
+    <hero_image>uploads/post/1749827294_produk4.png</hero_image>
+    <content>Apel merupakan jenis buah-buahan, atau buah yang dihasilkan dari pohon apel. Buah apel biasanya berwarna merah kulitnya jika masak dan siap dimakan, tetapi bisa juga kulitnya berwarna hijau atau kuning. Kulit buahnya agak lembek dan daging buahnya keras. Buah apel memiliki beberapa biji di dalamnya.</content>
+    <author_id>3</author_id>
+    <created_at>2025-06-13 15:08:14</created_at>
+    <upvotes>1</upvotes>
+    <downvotes>0</downvotes>
+    <votes>
+      <vote user_id="3" type="upvote"/>
+    </votes>
+  </post>
+</posts>
