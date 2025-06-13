@@ -1,4 +1,6 @@
 <?php
+// controllers/postController.php
+
 session_start();
 include_once '../includes/functions.php';
 
@@ -15,70 +17,98 @@ if ($action === 'vote') {
     $voteType = sanitizeInput($_POST['voteType'] ?? '');
     $currentUserId = $_SESSION['user']['id'];
     
-    $postsFile = '../data/posts.xml';
-    $postsXml = loadXMLData($postsFile);
-    if (!$postsXml) {
-        echo json_encode(['success' => false, 'message' => 'Could not load posts data']);
+    // Validate vote type.
+    if (!in_array($voteType, ['upvote', 'downvote'])) {
+        echo json_encode(['success' => false, 'message' => 'Invalid vote type.']);
         exit;
     }
     
-    $found = false;
+    $postsFile = '../data/posts.xml';
+    $postsXml = loadXMLData($postsFile);
+    if (!$postsXml) {
+        echo json_encode(['success' => false, 'message' => 'Could not load posts data.']);
+        exit;
+    }
+    
+    $postFound = false;
     foreach ($postsXml->post as $post) {
         if ((string)$post->id === $postId) {
-            $found = true;
+            $postFound = true;
             
-            // Ensure a <votes> element exists under the post.
+            // Ensure a <votes> element exists.
             if (!isset($post->votes)) {
                 $votes = $post->addChild('votes');
             } else {
                 $votes = $post->votes;
             }
             
-            // Check if user already voted
-            $alreadyVoted = false;
+            // Find if this user has already voted.
+            $existingVote = null;
             foreach ($votes->vote as $voteEntry) {
-                if ((string)$voteEntry['user_id'] === $currentUserId) {
-                    $alreadyVoted = true;
+                if ((string)$voteEntry['user_id'] === (string)$currentUserId) {
+                    $existingVote = $voteEntry;
                     break;
                 }
             }
             
-            if ($alreadyVoted) {
-                // User has already voted; return current vote counts
-                echo json_encode([
-                    'success' => false,
-                    'message' => 'You have already voted on this post.',
-                    'upvotes' => (int)$post->upvotes,
-                    'downvotes' => (int)$post->downvotes
-                ]);
-                exit;
-            }
-            
-            // Record the new vote
-            $newVote = $votes->addChild('vote');
-            $newVote->addAttribute('user_id', $currentUserId);
-            $newVote->addAttribute('type', $voteType);
-            
-            // Update the vote counts (if not already voted).
-            if ($voteType === 'upvote') {
-                $post->upvotes = intval($post->upvotes) + 1;
-            } elseif ($voteType === 'downvote') {
-                $post->downvotes = intval($post->downvotes) + 1;
+            // If no previous vote exists, record the new vote.
+            if (!$existingVote) {
+                // Add new vote record.
+                $newVote = $votes->addChild('vote');
+                $newVote->addAttribute('user_id', $currentUserId);
+                $newVote->addAttribute('type', $voteType);
+                
+                // Update vote counts.
+                if ($voteType === 'upvote') {
+                    $post->upvotes = intval($post->upvotes) + 1;
+                } else {
+                    $post->downvotes = intval($post->downvotes) + 1;
+                }
+            } else {
+                // A vote already exists for this user.
+                $currentVoteType = (string)$existingVote['type'];
+        
+                if ($currentVoteType === $voteType) {
+                    // Same vote clicked: cancel the vote.
+                    if ($voteType === 'upvote') {
+                        $post->upvotes = max(0, intval($post->upvotes) - 1);
+                    } else {
+                        $post->downvotes = max(0, intval($post->downvotes) - 1);
+                    }
+                    // Remove the existing vote element.
+                    $dom = dom_import_simplexml($votes);
+                    $domVote = dom_import_simplexml($existingVote);
+                    $dom->removeChild($domVote);
+                } else {
+                    // Different vote clicked: switch the vote.
+                    if ($currentVoteType === 'upvote') {
+                        // Remove upvote, add downvote.
+                        $post->upvotes = max(0, intval($post->upvotes) - 1);
+                        $post->downvotes = intval($post->downvotes) + 1;
+                    } else {
+                        // Remove downvote, add upvote.
+                        $post->downvotes = max(0, intval($post->downvotes) - 1);
+                        $post->upvotes = intval($post->upvotes) + 1;
+                    }
+                    // Update the vote type in the XML.
+                    $existingVote['type'] = $voteType;
+                }
             }
             
             // Save the updated XML.
             saveXMLData($postsXml, $postsFile);
             
+            // Return updated vote counts.
             echo json_encode([
                 'success' => true,
-                'upvotes' => (int)$post->upvotes,
-                'downvotes' => (int)$post->downvotes
+                'upvotes' => intval($post->upvotes),
+                'downvotes' => intval($post->downvotes)
             ]);
             exit;
         }
     }
     
-    if (!$found) {
+    if (!$postFound) {
         echo json_encode(['success' => false, 'message' => 'Post not found.']);
         exit;
     }
