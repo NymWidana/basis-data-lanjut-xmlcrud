@@ -56,6 +56,8 @@ $author = getUserById($postToShow->author_id);
       <!-- Show author's name, if available -->
       <?php if ($author): ?>
           <p class="text-sm text-gray-600 mb-4">By <?php echo htmlspecialchars($author->username); ?></p>
+      <?php else: ?>
+        <p class="text-sm text-gray-500 mb-2 text-red-900 italic">By Deleted User</p>
       <?php endif; ?>
       
       <?php if (!empty($postToShow->hero_image)): ?>
@@ -90,6 +92,9 @@ $author = getUserById($postToShow->author_id);
                     $reviewAuthor = getUserById($review->user_id);
                     if ($reviewAuthor) {
                         echo '<p class="text-sm text-gray-600 mb-1">Review by ' . htmlspecialchars($reviewAuthor->username) . '</p>';
+                    }
+                    else {
+                        echo '<p class="text-sm text-red-900 italic mb-1">Review by Deleted User</p>';
                     }
                 ?>
                 <p class="text-gray-800"><?php echo htmlspecialchars($review->comment); ?></p>
