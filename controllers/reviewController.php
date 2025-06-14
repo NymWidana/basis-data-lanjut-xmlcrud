@@ -83,17 +83,20 @@ elseif ($action === 'delete') {
         $reviewId = sanitizeInput($_GET['review_id']);
         $postId   = sanitizeInput($_GET['post_id']);
         $foundIndex = -1;
+        $i = 0;
 
         // Find the review and check ownership.
-        foreach ($reviewsXml->review as $key => $review) {
+        foreach ($reviewsXml->review as $review) {
             if ((string)$review->id === $reviewId && (string)$review->user_id === $_SESSION['user']['id']) {
-                $foundIndex = $key;
+                $foundIndex = $i;
                 break;
             }
+            $i++;
         }
 
         if ($foundIndex !== -1) {
             unset($reviewsXml->review[$foundIndex]);
+            error_log("Updated XML: " . $reviewsXml->asXML());
             saveXMLData($reviewsXml, $reviewsFile);
         }
 

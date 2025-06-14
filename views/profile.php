@@ -72,9 +72,16 @@ if (file_exists($postsFile)) {
                         <div class="text-sm text-gray-500">
                             Posted on <?php echo date("M d, Y", strtotime($post->created_at)); ?>
                         </div>
-                        <a href="forms/editPost.php?id=<?php echo $post->id; ?>" class="text-blue-500 hover:underline text-sm">
-                            <i class="fas fa-edit"></i> Edit Post
-                        </a>
+                        <div class="mt-1">
+                            <a href="forms/editPost.php?id=<?php echo $post->id; ?>" class="text-blue-500 hover:underline text-sm mr-2">
+                                <i class="fas fa-edit"></i> Edit Post
+                            </a>
+                            <a href="../controllers/postController.php?action=delete&post_id=<?php echo $post->id; ?>" 
+                              class="text-red-500 text-sm" 
+                              onclick="return confirm('Are you sure you want to delete this post?');">
+                                <i class="fas fa-trash"></i> Delete
+                            </a>
+                        </div>
                     </div>
                 <?php endforeach; ?>
             <?php endif; ?>

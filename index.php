@@ -75,6 +75,8 @@ $postsToDisplay = array_slice($posts, $start, $postsPerPage);
                             if ($author):
                         ?>
                             <p class="text-sm text-gray-500 mb-2">By <?php echo htmlspecialchars($author->username); ?></p>
+                        <?php else: ?>
+                            <p class="text-sm text-gray-500 mb-2 text-red-900 italic">By Deleted User</p>
                         <?php endif; ?>
                         <?php if (!empty($post->hero_image)): ?>
                             <img src="<?php echo htmlspecialchars($post->hero_image); ?>" alt="Hero Image" class="w-full h-auto mb-4">

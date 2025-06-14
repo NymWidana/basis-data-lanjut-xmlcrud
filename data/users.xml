@@ -34,13 +34,13 @@
     <username>widi</username>
     <email>test@email.com</email>
     <password>$2y$10$osxmvl7Zv3yuqi0rFJK4iObP7SLCgIn6o2m.Ib/Ux/WHh9nlLJIDW</password>
-    <profile_image>uploads/profile/banner.png</profile_image>
+    <profile_image>uploads/profile/1749872121_Bananavarieties.jpg</profile_image>
   </user>
   <user>
-    <id>6</id>
+    <id>7</id>
     <username>angga</username>
-    <email>test@email.com</email>
-    <password>$2y$10$MYLXES8aR7.mShNKDlC59.MLQ12J84/L4RzT7wPSGnG5RPHZR9fvy</password>
-    <profile_image>uploads/profile/1749825890_produk2.png</profile_image>
+    <email>widan00801@gmail.com</email>
+    <password>$2y$10$0NAZr.ueH5KIItwKeMrdzO6R6mIV9npRApwIE0NtE6/5u1NzEi6ce</password>
+    <profile_image>default.png</profile_image>
   </user>
 </users>

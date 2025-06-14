@@ -74,17 +74,23 @@ if ($action === 'delete') {
     if ($usersXml === false) {
         die("Unable to load user data.");
     }
+
+    $foundIndex = -1;
+    $i = 0;
     
     // Find and remove the matching user.
-    foreach ($usersXml->user as $key => $user) {
+    foreach ($usersXml->user as $user) {
         if ((string)$user->id === (string)$userId) {
-            unset($usersXml->user[$key]);
+            $foundIndex = $i;
             break;
         }
+        $i++;
     }
-    
-    // Save the updated XML data.
-    saveXMLData($usersXml, $usersFile);
+
+    if ($foundIndex !== -1) {
+        unset($usersXml->user[$foundIndex]);
+        saveXMLData($usersXml, $usersFile);
+    }
     
     // Destroy the session and redirect.
     session_destroy();

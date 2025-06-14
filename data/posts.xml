@@ -7,11 +7,65 @@
     <content>Apel merupakan jenis buah-buahan, atau buah yang dihasilkan dari pohon apel. Buah apel biasanya berwarna merah kulitnya jika masak dan siap dimakan, tetapi bisa juga kulitnya berwarna hijau atau kuning. Kulit buahnya agak lembek dan daging buahnya keras. Buah apel memiliki beberapa biji di dalamnya.</content>
     <author_id>3</author_id>
     <created_at>2025-06-13 15:08:14</created_at>
-    <upvotes>0</upvotes>
-    <downvotes>2</downvotes>
+    <upvotes>1</upvotes>
+    <downvotes>1</downvotes>
     <votes>
       <vote user_id="3" type="downvote"/>
-      <vote user_id="6" type="downvote"/>
+      <vote user_id="6" type="upvote"/>
     </votes>
+  </post>
+  <post>
+    <id>3</id>
+    <title>akun official instiki di instagram terkena hack, berikut menurut para ahli</title>
+    <hero_image>uploads/post/1749872007_Bananavarieties.jpg</hero_image>
+    <content>A banana is an elongated, edible fruit – botanically a berry[1] – produced by several kinds of large treelike herbaceous flowering plants in the genus Musa. In some countries, cooking bananas are called plantains, distinguishing them from dessert bananas. The fruit is variable in size, color and firmness, but is usually elongated and curved, with soft flesh rich in starch covered with a peel, which may have a variety of colors when ripe. It grows upward in clusters near the top of the plant. Almost all modern edible seedless (parthenocarp) cultivated bananas come from two wild species – Musa acuminata and Musa balbisiana, or hybrids of them.&#13;
+&#13;
+Musa species are native to tropical Indomalaya and Australia; they were probably domesticated in New Guinea. They are grown in 135 countries, primarily for their fruit, and to a lesser extent to make banana paper and textiles, while some are grown as ornamental plants. The world's largest producers of bananas in 2022 were India and China, which together accounted for approximately 26% of total production. Bananas are eaten raw or cooked in recipes varying from curries to banana chips, fritters, fruit preserves, or simply baked or steamed.&#13;
+&#13;
+Worldwide, there is no sharp distinction between dessert "bananas" and cooking "plantains": this distinction works well enough in the Americas and Europe, but it breaks down in Southeast Asia where many more kinds of bananas are grown and eaten. The term "banana" is applied also to other members of the genus Musa, such as the scarlet banana (Musa coccinea), the pink banana (Musa velutina), and the Fe'i bananas. Members of the genus Ensete, such as the snow banana (Ensete glaucum) and the economically important false banana (Ensete ventricosum) of Africa are sometimes included. Both genera are in the banana family, Musaceae.&#13;
+&#13;
+Banana plantations are subject to damage by parasitic nematodes and insect pests, and to fungal and bacterial diseases, one of the most serious being Panama disease which is caused by a Fusarium fungus. This and black sigatoka threaten the production of Cavendish bananas, the main kind eaten in the Western world, which is a triploid Musa acuminata. Plant breeders are seeking new varieties, but these are difficult to breed given that commercial varieties are seedless. To enable future breeding, banana germplasm is conserved in multiple gene banks around the world.&#13;
+&#13;
+Description</content>
+    <author_id>6</author_id>
+    <created_at>2025-06-14 03:33:27</created_at>
+    <upvotes>1</upvotes>
+    <downvotes>0</downvotes>
+    <votes>
+      <vote user_id="6" type="upvote"/>
+    </votes>
+  </post>
+  <post>
+    <id>4</id>
+    <title>test delete</title>
+    <hero_image/>
+    <content>test test test</content>
+    <author_id>6</author_id>
+    <created_at>2025-06-14 03:55:37</created_at>
+    <upvotes>1</upvotes>
+    <downvotes>0</downvotes>
+    <votes>
+      <vote user_id="6" type="upvote"/>
+    </votes>
+  </post>
+  <post>
+    <id>5</id>
+    <title>test delete</title>
+    <hero_image>uploads/post/1749882662_Bananavarieties.jpg</hero_image>
+    <content>testtttttttt</content>
+    <author_id>7</author_id>
+    <created_at>2025-06-14 06:31:02</created_at>
+    <upvotes>0</upvotes>
+    <downvotes>0</downvotes>
+  </post>
+  <post>
+    <id>6</id>
+    <title>test hilang</title>
+    <hero_image>uploads/post/1749882866_dasi.jpg</hero_image>
+    <content>dasi keren</content>
+    <author_id>8</author_id>
+    <created_at>2025-06-14 06:34:26</created_at>
+    <upvotes>0</upvotes>
+    <downvotes>0</downvotes>
   </post>
 </posts>

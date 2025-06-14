@@ -166,6 +166,39 @@ elseif ($action === 'create') {
     }
 }
 
+// Handle deleting a post.
+elseif ($action === 'delete') {
+    if (isset($_GET['post_id'])) {
+        // Load the posts XML.
+        $postsFile = '../data/posts.xml';
+        $postsXml = loadXMLData($postsFile);
+        if ($postsXml === false) {
+            die("Unable to load posts data.");
+        }
+
+        $postId   = sanitizeInput($_GET['post_id']);
+        $foundIndex = -1;
+        $i = 0;
+
+        // Find the post and check ownership.
+        foreach ($postsXml->post as $post) {
+            if ((string)$post->id === $postId && (string)$post->author_id === $_SESSION['user']['id']) {
+                $foundIndex = $i;
+                break;
+            }
+            $i++;
+        }
+        if ($foundIndex !== -1) {
+            unset($postsXml->post[$foundIndex]);
+            error_log("Updated XML: " . $postsXml->asXML());
+            saveXMLData($postsXml, $postsFile);
+        }
+
+        header("Location: ../views/profile.php");
+        exit;
+    }
+}
+
 // Additional actions for editing or deleting posts can be handled here.
 
 else {
