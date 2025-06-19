@@ -48,7 +48,7 @@ elseif ($action === 'register') {
         $email    = sanitizeInput($_POST['email']);
         $password = $_POST['password'];
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-        $profileImage = 'default.png';  // Default profile image fallback.
+        $profileImage = 'uploads/profile/default.png';  // Default profile image fallback.
         
         // Attempt to create a new user.
         if (createUser($username, $email, $hashedPassword, $profileImage)) {
