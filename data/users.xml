@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<users>
+<users next_id="5">
   <user>
     <id>1</id>
     <username>john_doe</username>
@@ -27,7 +27,7 @@
     <username>angga</username>
     <email>angga@mail.com</email>
     <password>$2y$10$GNyGeWU2MxtFwbGRmGoD/uyEFu7NFo17oYlpQvnrYgPEgFdY.hCa6</password>
-    <profile_image>profile.png</profile_image>
+    <profile_image>uploads/profile/default.png</profile_image>
   </user>
   <user>
     <id>5</id>
@@ -41,6 +41,13 @@
     <username>angga</username>
     <email>widan00801@gmail.com</email>
     <password>$2y$10$0NAZr.ueH5KIItwKeMrdzO6R6mIV9npRApwIE0NtE6/5u1NzEi6ce</password>
-    <profile_image>default.png</profile_image>
+    <profile_image>uploads/profile/default.png</profile_image>
+  </user>
+  <user>
+    <id>8</id>
+    <username>admin</username>
+    <email>admin@gmail.com</email>
+    <password>$2y$10$oHtBwuJr/MejW2aVQN07OejXROP6eI.itjQrvWuQXc16HSL2sLQKW</password>
+    <profile_image>uploads/profile/default.png</profile_image>
   </user>
 </users>

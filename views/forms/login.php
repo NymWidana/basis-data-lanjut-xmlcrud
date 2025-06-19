@@ -15,7 +15,8 @@ include_once '../components/header.php';
                 </div>
             <?php endif; ?>
 
-            <form action="/controllers/authController.php?action=login" method="POST">
+            <!-- Updated form action using the correct relative path -->
+            <form action="../../controllers/authController.php?action=login" method="POST">
                 <div class="mb-4">
                     <label for="username" class="block text-gray-700">Username</label>
                     <input type="text" name="username" id="username" required

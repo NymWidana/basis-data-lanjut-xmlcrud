@@ -25,14 +25,6 @@ if (session_status() == PHP_SESSION_NONE) {
                     <a href="/views/forms/createUser.php" class="text-gray-600 hover:text-gray-800">Register</a>
                 <?php endif; ?>
             </nav>
-
-            <!-- Search Form -->
-            <form action="/index.php" method="GET" class="flex items-center">
-                <input type="text" name="search" placeholder="Search posts..." class="border border-gray-300 rounded-l px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <button type="submit" class="bg-blue-500 text-white rounded-r px-3 py-1">
-                    <i class="fa fa-search"></i>
-                </button>
-            </form>
         </div>
     </div>
 </header>

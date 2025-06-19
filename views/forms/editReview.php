@@ -20,38 +20,35 @@ if (!$reviewId || !$postId) {
     exit;
 }
 
-// Load the reviews data.
-$reviewsFile = '../../data/reviews.xml';
-if (file_exists($reviewsFile)) {
-    $reviewsXml = simplexml_load_file($reviewsFile);
-} else {
-    echo "<div class='container mx-auto px-4 py-8'>
-            <p class='text-center text-red-500'>Unable to load reviews data.</p>
-          </div>";
-    exit;
-}
+// Use the DOM-based review model.
+require_once '../../models/reviewModel.php';
 
-// Find the review matching the given ID.
-$review = null;
-foreach ($reviewsXml->review as $r) {
-    if ((string)$r->id === $reviewId) {
-        $review = $r;
-        break;
-    }
-}
-if (!$review) {
+// Load the reviews using the DOM.
+$dom = loadReviewDOM();
+$xpath = new DOMXPath($dom);
+
+// Find the review node by matching the <id>'s text.
+$query = sprintf("//review[id/text()='%s']", $reviewId);
+$reviewNode = $xpath->query($query)->item(0);
+
+if (!$reviewNode) {
     echo "<div class='container mx-auto px-4 py-8'>
             <p class='text-center text-red-500'>Review not found.</p>
           </div>";
     exit;
 }
+
+// Get the comment text from the review node.
+$commentNode = $xpath->query("comment", $reviewNode)->item(0);
+$commentText = $commentNode ? $commentNode->nodeValue : '';
 ?>
 
 <body class="bg-gray-100">
     <div class="container mx-auto px-4 py-8">
         <div class="max-w-md mx-auto bg-white p-6 rounded shadow">
             <h1 class="text-2xl font-bold mb-6 text-center">Edit Review</h1>
-            <form action="../../controllers/reviewController.php?action=edit" method="POST">
+            <!-- Form action points to your review controller using the new model -->
+            <form action="../../controllers/reviewController.php?action=update" method="POST">
                 <!-- Hidden fields pass the review and post IDs to the controller -->
                 <input type="hidden" name="review_id" value="<?php echo htmlspecialchars($reviewId); ?>">
                 <input type="hidden" name="post_id" value="<?php echo htmlspecialchars($postId); ?>">
@@ -59,7 +56,7 @@ if (!$review) {
                     <label for="comment" class="block text-gray-700">Your Review</label>
                     <textarea id="comment" name="comment" rows="4" required
                         class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="Update your review here..."><?php echo htmlspecialchars($review->comment); ?></textarea>
+                        placeholder="Update your review here..."><?php echo htmlspecialchars($commentText); ?></textarea>
                 </div>
                 <div>
                     <button type="submit"

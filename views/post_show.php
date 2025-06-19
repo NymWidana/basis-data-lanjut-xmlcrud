@@ -1,10 +1,9 @@
 <?php
-// views/post_show.php
 session_start();
 include_once 'components/head.php';
 include_once 'components/header.php';
 
-// Check if the post ID is provided.
+// Make sure a post ID is provided.
 if (!isset($_GET['id'])) {
     echo "<div class='container mx-auto px-4 py-8'><p class='text-center text-red-500'>No post specified.</p></div>";
     exit;
@@ -12,69 +11,93 @@ if (!isset($_GET['id'])) {
 
 $postId = htmlspecialchars($_GET['id']);
 
-// Load the post data.
-$postsFile = "../data/posts.xml";
-$postToShow = null;
+// Include our DOM-based models.
+require_once '../models/postModel.php';
+require_once '../models/reviewModel.php';
+require_once '../models/userModel.php';
 
-if (file_exists($postsFile)) {
-    $postsXml = simplexml_load_file($postsFile);
-    foreach ($postsXml->post as $post) {
-        if ((string)$post->id === $postId) {
-            $postToShow = $post;
-            break;
-        }
-    }
-}
+// ----------------------------------------------------------------------
+// Load the Post using DOM-based model functions.
+// ----------------------------------------------------------------------
+$domPost = loadPostDOM();  // Returns a DOMDocument for posts.
+$xpathPost = new DOMXPath($domPost);
+$postQuery = sprintf("//post[id/text()='%s']", $postId);
+$postNode = $xpathPost->query($postQuery)->item(0);
 
-if (!$postToShow) {
+if (!$postNode) {
     echo "<div class='container mx-auto px-4 py-8'><p class='text-center text-red-500'>Post not found.</p></div>";
     exit;
 }
 
-// Load reviews for this post.
+// Convert the found post node to an associative array.
+$postToShow = [
+    'id'         => $xpathPost->query("id", $postNode)->item(0)->nodeValue,
+    'title'      => $xpathPost->query("title", $postNode)->item(0)->nodeValue,
+    'content'    => $xpathPost->query("content", $postNode)->item(0)->nodeValue,
+    'author_id'  => $xpathPost->query("author_id", $postNode)->item(0)->nodeValue,
+    'hero_image' => $xpathPost->query("hero_image", $postNode)->item(0)->nodeValue,
+    'upvotes'    => $xpathPost->query("upvotes", $postNode)->item(0)->nodeValue,
+    'downvotes'  => $xpathPost->query("downvotes", $postNode)->item(0)->nodeValue,
+    'created_at' => $xpathPost->query("created_at", $postNode)->item(0)->nodeValue,
+];
+
+// ----------------------------------------------------------------------
+// Load Reviews for this post using the DOM-based review model.
+// ----------------------------------------------------------------------
+$domReview = loadReviewDOM();  // Returns a DOMDocument for reviews.
+$xpathReview = new DOMXPath($domReview);
+$reviewQuery = sprintf("//review[post_id/text()='%s']", $postId);
+$reviewNodes = $xpathReview->query($reviewQuery);
 $reviewsArray = [];
-$reviewsFile = "../data/reviews.xml";
-if (file_exists($reviewsFile)) {
-    $reviewsXml = simplexml_load_file($reviewsFile);
-    foreach ($reviewsXml->review as $review) {
-        if ((string)$review->post_id === $postId) {
-            $reviewsArray[] = $review;
-        }
-    }
+
+foreach ($reviewNodes as $reviewNode) {
+    $reviewsArray[] = [
+        'id'         => $xpathReview->query("id", $reviewNode)->item(0)->nodeValue,
+        'post_id'    => $xpathReview->query("post_id", $reviewNode)->item(0)->nodeValue,
+        'user_id'    => $xpathReview->query("user_id", $reviewNode)->item(0)->nodeValue,
+        'comment'    => $xpathReview->query("comment", $reviewNode)->item(0)->nodeValue,
+        'created_at' => $xpathReview->query("created_at", $reviewNode)->item(0)->nodeValue,
+    ];
 }
 
-// Lookup the post's author using the helper function.
-include_once '../includes/functions.php'; // Ensure function is available.
-$author = getUserById($postToShow->author_id);
+// ----------------------------------------------------------------------
+// Lookup the Post's Author using the DOM-based user model.
+// ----------------------------------------------------------------------
+$authorNode = getUserById($postToShow['author_id']);
+if ($authorNode) {
+    $xpathUser = new DOMXPath($authorNode->ownerDocument);
+    $authorUsername = $xpathUser->query("username", $authorNode)->item(0)->nodeValue;
+}
 ?>
 <body class="bg-gray-100">
   <div class="container mx-auto px-4 py-8">
     <!-- Post Content -->
     <div class="bg-white rounded shadow p-6 mb-8">
-      <h1 class="text-3xl font-bold mb-2"><?php echo htmlspecialchars($postToShow->title); ?></h1>
+      <h1 class="text-3xl font-bold mb-2"><?php echo htmlspecialchars($postToShow['title']); ?></h1>
       
       <!-- Show author's name, if available -->
-      <?php if ($author): ?>
-          <p class="text-sm text-gray-600 mb-4">By <?php echo htmlspecialchars($author->username); ?></p>
+      <?php if (isset($authorUsername)): ?>
+          <p class="text-sm text-gray-600 mb-4">By <?php echo htmlspecialchars($authorUsername); ?></p>
       <?php else: ?>
-        <p class="text-sm text-gray-500 mb-2 text-red-900 italic">By Deleted User</p>
+          <p class="text-sm text-gray-500 mb-2 text-red-900 italic">By Deleted User</p>
       <?php endif; ?>
       
-      <?php if (!empty($postToShow->hero_image)): ?>
-         <img src="/<?php echo htmlspecialchars($postToShow->hero_image); ?>" alt="Hero Image" class="w-full h-auto mb-4">
+      <?php if (!empty($postToShow['hero_image'])): ?>
+         <img src="/<?php echo htmlspecialchars($postToShow['hero_image']); ?>" alt="Hero Image" class="w-full h-auto mb-4">
       <?php endif; ?>
+      
       <div class="prose max-w-none">
-        <?php echo nl2br(htmlspecialchars($postToShow->content)); ?>
+        <?php echo nl2br(htmlspecialchars($postToShow['content'])); ?>
       </div>
       <div class="mt-4 text-sm text-gray-500">
-         Posted on <?php echo date("M d, Y", strtotime($postToShow->created_at)); ?>
+         Posted on <?php echo date("M d, Y", strtotime($postToShow['created_at'])); ?>
       </div>
       <div class="mt-4 flex items-center">
          <button onclick="vote('<?php echo $postId; ?>', 'upvote')" class="mr-4 text-green-600">
-              <i class="fa fa-thumbs-up"></i> <span id="upvote-<?php echo $postId; ?>"><?php echo $postToShow->upvotes; ?></span>
+              <i class="fa fa-thumbs-up"></i> <span id="upvote-<?php echo $postId; ?>"><?php echo $postToShow['upvotes']; ?></span>
          </button>
          <button onclick="vote('<?php echo $postId; ?>', 'downvote')" class="text-red-600">
-              <i class="fa fa-thumbs-down"></i> <span id="downvote-<?php echo $postId; ?>"><?php echo $postToShow->downvotes; ?></span>
+              <i class="fa fa-thumbs-down"></i> <span id="downvote-<?php echo $postId; ?>"><?php echo $postToShow['downvotes']; ?></span>
          </button>
       </div>
     </div>
@@ -85,36 +108,37 @@ $author = getUserById($postToShow->author_id);
        <?php if (empty($reviewsArray)): ?>
           <p class="text-gray-600">No reviews yet. Be the first to review!</p>
        <?php else: ?>
-        <?php foreach ($reviewsArray as $review): ?>
-            <div class="border-b py-2">
-                <?php 
-                    // Get review author's details.
-                    $reviewAuthor = getUserById($review->user_id);
-                    if ($reviewAuthor) {
-                        echo '<p class="text-sm text-gray-600 mb-1">Review by ' . htmlspecialchars($reviewAuthor->username) . '</p>';
-                    }
-                    else {
-                        echo '<p class="text-sm text-red-900 italic mb-1">Review by Deleted User</p>';
-                    }
-                ?>
-                <p class="text-gray-800"><?php echo htmlspecialchars($review->comment); ?></p>
-                <small class="text-gray-500">
-                    Posted on <?php echo date("M d, Y", strtotime($review->created_at)); ?>
-                </small>
-                <?php if (isset($_SESSION['user']) && (string)$review->user_id === $_SESSION['user']['id']): ?>
-                    <div class="mt-1">
-                        <a href="forms/editReview.php?review_id=<?php echo $review->id; ?>&post_id=<?php echo $postId; ?>" class="text-blue-500 text-sm mr-2">
-                            <i class="fas fa-edit"></i> Edit
-                        </a>
-                        <a href="../controllers/reviewController.php?action=delete&review_id=<?php echo $review->id; ?>&post_id=<?php echo $postId; ?>" 
-                          class="text-red-500 text-sm" 
-                          onclick="return confirm('Are you sure you want to delete this review?');">
-                            <i class="fas fa-trash"></i> Delete
-                        </a>
-                    </div>
-                <?php endif; ?>
-            </div>
-        <?php endforeach; ?>
+          <?php foreach ($reviewsArray as $review): ?>
+              <div class="border-b py-2">
+                  <?php  
+                      // Get review author's details using DOM-based getUserById().
+                      $reviewAuthorNode = getUserById($review['user_id']);
+                      if ($reviewAuthorNode) {
+                          $xpathAuthor = new DOMXPath($reviewAuthorNode->ownerDocument);
+                          $reviewAuthorUsername = $xpathAuthor->query("username", $reviewAuthorNode)->item(0)->nodeValue;
+                          echo '<p class="text-sm text-gray-600 mb-1">Review by ' . htmlspecialchars($reviewAuthorUsername) . '</p>';
+                      } else {
+                          echo '<p class="text-sm text-red-900 italic mb-1">Review by Deleted User</p>';
+                      }
+                  ?>
+                  <p class="text-gray-800"><?php echo htmlspecialchars($review['comment']); ?></p>
+                  <small class="text-gray-500">
+                      Posted on <?php echo date("M d, Y", strtotime($review['created_at'])); ?>
+                  </small>
+                  <?php if (isset($_SESSION['user']) && $review['user_id'] === $_SESSION['user']['id']): ?>
+                      <div class="mt-1">
+                          <a href="forms/editReview.php?review_id=<?php echo $review['id']; ?>&post_id=<?php echo $postId; ?>" class="text-blue-500 text-sm mr-2">
+                              <i class="fas fa-edit"></i> Edit
+                          </a>
+                          <a href="../controllers/reviewController.php?action=delete&review_id=<?php echo $review['id']; ?>&post_id=<?php echo $postId; ?>" 
+                             class="text-red-500 text-sm" 
+                             onclick="return confirm('Are you sure you want to delete this review?');">
+                              <i class="fas fa-trash"></i> Delete
+                          </a>
+                      </div>
+                  <?php endif; ?>
+              </div>
+          <?php endforeach; ?>
        <?php endif; ?>
     </div>
 
@@ -149,7 +173,9 @@ $author = getUserById($postToShow->author_id);
 
       fetch('../controllers/postController.php', {
           method: 'POST',
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          headers: {
+              "Content-Type": "application/x-www-form-urlencoded"
+          },
           body: formData.toString()
       })
       .then(response => response.json())

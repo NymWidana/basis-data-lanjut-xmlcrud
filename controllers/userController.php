@@ -1,23 +1,26 @@
 <?php
 session_start();
 include_once '../includes/functions.php';
+require_once '../models/userModel.php';  // Contains DOM functions for user management
 
 $action = $_POST['action'] ?? ($_GET['action'] ?? '');
 
-// Make sure the user is logged in for actions that require authentication.
+// Ensure user is logged in.
 if (!isset($_SESSION['user'])) {
     header("Location: ../views/forms/login.php");
     exit;
 }
 
-// Update user profile information
+// ----------------------------------------------------------------------
+// Update Profile: Use the DOM-based updateUser() function.
+// ----------------------------------------------------------------------
 if ($action === 'updateProfile') {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $userId   = $_SESSION['user']['id'];
         $username = sanitizeInput($_POST['username']);
         $email    = sanitizeInput($_POST['email']);
-
-        // Handle profile image upload if provided.
+        
+        // Handle profile image upload, if provided.
         $profileImagePath = '';
         if (isset($_FILES['profile_image']) && $_FILES['profile_image']['error'] == 0) {
             $uploadDir = '../uploads/profile/';
@@ -30,33 +33,16 @@ if ($action === 'updateProfile') {
                 $profileImagePath = 'uploads/profile/' . $filename;
             }
         }
-
-        $usersFile = '../data/users.xml';
-        $usersXml = loadXMLData($usersFile);
-        if ($usersXml === false) {
-            die("Unable to load user data.");
-        }
-
-        $userFound = false;
-        foreach ($usersXml->user as $user) {
-            if ((string)$user->id === $userId) {
-                // Update profile details
-                $user->username = $username;
-                $user->email = $email;
-                if (!empty($profileImagePath)) {
-                    $user->profile_image = $profileImagePath;
-                }
-                $userFound = true;
-                // Update session variables as well
-                $_SESSION['user']['username'] = $username;
-                $_SESSION['user']['email'] = $email;
+        
+        // Call the DOM-based update function.
+        $updateResult = updateUser($userId, $username, $email, $profileImagePath);
+        if ($updateResult) {
+            // Update session variables to reflect the changes.
+            $_SESSION['user']['username'] = $username;
+            $_SESSION['user']['email'] = $email;
+            if (!empty($profileImagePath)) {
                 $_SESSION['user']['profile_image'] = $profileImagePath;
-                break;
             }
-        }
-
-        if ($userFound) {
-            saveXMLData($usersXml, $usersFile);
             header("Location: ../views/profile.php?updated=1");
             exit;
         } else {
@@ -66,40 +52,23 @@ if ($action === 'updateProfile') {
     }
 }
 
-// Delete Account Action
-if ($action === 'delete') {
+// ----------------------------------------------------------------------
+// Delete Account: Use the DOM-based deleteUser() function.
+// ----------------------------------------------------------------------
+elseif ($action === 'delete') {
     $userId = $_SESSION['user']['id'];
-    $usersFile = '../data/users.xml';
-    $usersXml = loadXMLData($usersFile);
-    if ($usersXml === false) {
-        die("Unable to load user data.");
-    }
-
-    $foundIndex = -1;
-    $i = 0;
+    $deleteResult = deleteUser($userId);
     
-    // Find and remove the matching user.
-    foreach ($usersXml->user as $user) {
-        if ((string)$user->id === (string)$userId) {
-            $foundIndex = $i;
-            break;
-        }
-        $i++;
-    }
-
-    if ($foundIndex !== -1) {
-        unset($usersXml->user[$foundIndex]);
-        saveXMLData($usersXml, $usersFile);
-    }
-    
-    // Destroy the session and redirect.
+    // Destroy the session and redirect after deletion.
     session_destroy();
     header("Location: ../index.php?account_deleted=1");
     exit;
 }
-// Additional user-related actions (like viewing a profile) can be added here.
+
+// ----------------------------------------------------------------------
+// Fallback: if no valid action is provided, redirect to profile.
+// ----------------------------------------------------------------------
 else {
-    // Redirect to profile view if no valid action is specified.
     header("Location: ../views/profile.php");
     exit;
 }

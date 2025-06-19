@@ -8,10 +8,11 @@
     <author_id>3</author_id>
     <created_at>2025-06-13 15:08:14</created_at>
     <upvotes>1</upvotes>
-    <downvotes>1</downvotes>
+    <downvotes>2</downvotes>
     <votes>
       <vote user_id="3" type="downvote"/>
       <vote user_id="6" type="upvote"/>
+      <vote user_id="8" type="downvote"/>
     </votes>
   </post>
   <post>
@@ -43,9 +44,10 @@ Description</content>
     <author_id>6</author_id>
     <created_at>2025-06-14 03:55:37</created_at>
     <upvotes>1</upvotes>
-    <downvotes>0</downvotes>
+    <downvotes>1</downvotes>
     <votes>
       <vote user_id="6" type="upvote"/>
+      <vote user_id="8" type="downvote"/>
     </votes>
   </post>
   <post>
@@ -67,5 +69,27 @@ Description</content>
     <created_at>2025-06-14 06:34:26</created_at>
     <upvotes>0</upvotes>
     <downvotes>0</downvotes>
+  </post>
+  <post>
+    <id>7</id>
+    <title>Chemical Equipment</title>
+    <hero_image>uploads/post/1750331783_WhatsApp Image 2024-10-09 at 17.05.32.jpeg</hero_image>
+    <content>ssssss</content>
+    <author_id>8</author_id>
+    <created_at>2025-06-19 11:00:06</created_at>
+    <upvotes>0</upvotes>
+    <downvotes>0</downvotes>
+    <votes/>
+  </post>
+  <post>
+    <id>8</id>
+    <title>test delete</title>
+    <hero_image/>
+    <content>sdsad</content>
+    <author_id>8</author_id>
+    <created_at>2025-06-19 11:53:28</created_at>
+    <upvotes>0</upvotes>
+    <downvotes>0</downvotes>
+    <votes/>
   </post>
 </posts>

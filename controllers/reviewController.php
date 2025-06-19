@@ -1,6 +1,7 @@
 <?php
 session_start();
 include_once '../includes/functions.php';
+require_once '../models/reviewModel.php';
 
 $action = $_POST['action'] ?? ($_GET['action'] ?? '');
 
@@ -10,96 +11,85 @@ if (!isset($_SESSION['user'])) {
     exit;
 }
 
-$reviewsFile = '../data/reviews.xml';
-$reviewsXml = loadXMLData($reviewsFile);
-if ($reviewsXml === false) {
-    // If file is not found, initialize new XML structure.
-    $reviewsXml = new SimpleXMLElement('<reviews></reviews>');
-}
-
-// Handle creating a new review.
+// ----------------------------------------------------------------------
+// Create: Add a new review using DOM-based functions.
+// ----------------------------------------------------------------------
 if ($action === 'create') {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $postId  = sanitizeInput($_POST['post_id']);
-        $comment = sanitizeInput($_POST['comment']);
-        $userId  = $_SESSION['user']['id'];
+        $postId   = sanitizeInput($_POST['post_id']);
+        $comment  = sanitizeInput($_POST['comment']);
+        $userId   = $_SESSION['user']['id'];
         $createdAt = date("Y-m-d H:i:s");
 
-        // Generate a new unique review ID.
-        $newReviewId = generateID($reviewsXml, 'review');
-
-        // Append the new review to the XML.
-        $newReview = $reviewsXml->addChild('review');
-        $newReview->addChild('id', $newReviewId);
-        $newReview->addChild('post_id', $postId);
-        $newReview->addChild('user_id', $userId);
-        $newReview->addChild('comment', $comment);
-        $newReview->addChild('created_at', $createdAt);
-
-        // Save the XML file.
-        saveXMLData($reviewsXml, $reviewsFile);
-
-        header("Location: ../views/post_show.php?id=" . $postId);
-        exit;
+        // Call the DOM-based function to create the review.
+        if (createReview($postId, $userId, $comment, $createdAt)) {
+            header("Location: ../views/post_show.php?id=" . $postId);
+            exit;
+        } else {
+            // Handle error (optionally display a message)
+            header("Location: ../views/post_show.php?id=" . $postId . "&error=create");
+            exit;
+        }
     }
 }
 
-// Handle editing an existing review.
-elseif ($action === 'edit') {
+// ----------------------------------------------------------------------
+// Update: Update an existing review using DOM-based functions.
+// ----------------------------------------------------------------------
+elseif ($action === 'update') {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $reviewId = sanitizeInput($_POST['review_id']);
+        $reviewId       = sanitizeInput($_POST['review_id']);
         $updatedComment = sanitizeInput($_POST['comment']);
-        $postId = sanitizeInput($_POST['post_id']);
-        $found = false;
+        $postId         = sanitizeInput($_POST['post_id']);
 
-        foreach ($reviewsXml->review as $review) {
-            if ((string)$review->id === $reviewId) {
-                // Only allow the owner to update their review.
-                if ((string)$review->user_id !== $_SESSION['user']['id']) {
-                    header("Location: ../views/post_show.php?id=" . $postId);
-                    exit;
-                }
-
-                // Update review comment and timestamp.
-                $review->comment = $updatedComment;
-                $review->created_at = date("Y-m-d H:i:s");
-                $found = true;
-                break;
-            }
+        // Retrieve the review node (using our DOM model function).
+        $reviewNode = getReviewById($reviewId);
+        if (!$reviewNode) {
+            // Review not found: redirect back.
+            header("Location: ../views/post_show.php?id=" . $postId);
+            exit;
         }
-
-        if ($found) {
-            saveXMLData($reviewsXml, $reviewsFile);
+        
+        // Check if the logged-in user is the owner.
+        $dom    = $reviewNode->ownerDocument;
+        $xpath  = new DOMXPath($dom);
+        /** @var DOMElement $userNode */
+        $userNode = $xpath->query("user_id", $reviewNode)->item(0);
+        if (!$userNode || ((string)$userNode->nodeValue !== $_SESSION['user']['id'])) {
+            header("Location: ../views/post_show.php?id=" . $postId);
+            exit;
         }
-
-        header("Location: ../views/post_show.php?id=" . $postId);
-        exit;
+        
+        // Update the review using our DOM-based update function.
+        if (updateReview($reviewId, $updatedComment, date("Y-m-d H:i:s"))) {
+            header("Location: ../views/post_show.php?id=" . $postId);
+            exit;
+        } else {
+            header("Location: ../views/post_show.php?id=" . $postId . "&error=update");
+            exit;
+        }
     }
 }
 
-// Handle deleting a review.
+// ----------------------------------------------------------------------
+// Delete: Remove a review using DOM-based functions.
+// ----------------------------------------------------------------------
 elseif ($action === 'delete') {
     if (isset($_GET['review_id']) && isset($_GET['post_id'])) {
         $reviewId = sanitizeInput($_GET['review_id']);
         $postId   = sanitizeInput($_GET['post_id']);
-        $foundIndex = -1;
-        $i = 0;
 
-        // Find the review and check ownership.
-        foreach ($reviewsXml->review as $review) {
-            if ((string)$review->id === $reviewId && (string)$review->user_id === $_SESSION['user']['id']) {
-                $foundIndex = $i;
-                break;
+        $reviewNode = getReviewById($reviewId);
+        if ($reviewNode) {
+            $dom    = $reviewNode->ownerDocument;
+            $xpath  = new DOMXPath($dom);
+            /** @var DOMElement $userNode */
+            $userNode = $xpath->query("user_id", $reviewNode)->item(0);
+            // Only allow deletion if the review belongs to the logged-in user.
+            if ($userNode && (string)$userNode->nodeValue === $_SESSION['user']['id']) {
+                deleteReview($reviewId);
             }
-            $i++;
         }
-
-        if ($foundIndex !== -1) {
-            unset($reviewsXml->review[$foundIndex]);
-            error_log("Updated XML: " . $reviewsXml->asXML());
-            saveXMLData($reviewsXml, $reviewsFile);
-        }
-
         header("Location: ../views/post_show.php?id=" . $postId);
         exit;
     }

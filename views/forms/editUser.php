@@ -22,24 +22,29 @@ include_once '../components/header.php';
                 </div>
             <?php endif; ?>
 
-            <form action="../../controllers/userController.php?action=updateProfile" method="POST" enctype="multipart/form-data">
+            <!-- Updated form action points one level up, as controllers are now in ../controllers -->
+            <form action="../../controllers/userController.php?action=updateProfile" 
+                  method="POST" enctype="multipart/form-data">
                 <div class="mb-4">
                     <label for="username" class="block text-gray-700">Username</label>
-                    <input type="text" name="username" id="username" value="<?php echo htmlspecialchars($user['username']); ?>" required
+                    <input type="text" name="username" id="username" required
+                           value="<?php echo htmlspecialchars($user['username']); ?>"
                            class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
                 <div class="mb-4">
                     <label for="email" class="block text-gray-700">Email</label>
-                    <input type="email" name="email" id="email" value="<?php echo htmlspecialchars($user['email']); ?>" required
+                    <input type="email" name="email" id="email" required
+                           value="<?php echo htmlspecialchars($user['email']); ?>"
                            class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
                 <div class="mb-4">
                     <label for="profile_image" class="block text-gray-700">Profile Image</label>
                     <input type="file" name="profile_image" id="profile_image"
                            class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <?php if (!empty($_SESSION['user']['profile_image'])): ?>
+                    <?php if (!empty($user['profile_image'])): ?>
                         <div class="mt-2">
-                            <img src="/<?php echo htmlspecialchars($_SESSION['user']['profile_image']); ?>" alt="Profile Image" class="w-20 h-20 object-cover rounded-full">
+                            <img src="/<?php echo htmlspecialchars($user['profile_image']); ?>" alt="Profile Image" 
+                                 class="w-20 h-20 object-cover rounded-full">
                         </div>
                     <?php endif; ?>
                 </div>
