@@ -1,53 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<users next_id="5">
+<users next_id="4">
   <user>
     <id>1</id>
-    <username>john_doe</username>
-    <profile_image>uploads/profiles/john_doe.jpg</profile_image>
-    <email>john@example.com</email>
-    <!-- Add additional user fields as needed -->
+    <username>widana</username>
+    <email>widana@gmail.com</email>
+    <password>$2y$10$rXet9Z/oVdhkHLLOcnecN.DeyjtDv2TGsOO06DKtAeSGavkgFjTcu</password>
+    <profile_image>uploads/profile/1750345087_pfp_.png</profile_image>
   </user>
-  <!-- More user entries -->
   <user>
     <id>2</id>
-    <username>widana</username>
-    <email>widan0001@gmail.com</email>
-    <password>$2y$10$pltnDiiiNlW7qRycEAjIpe3Y24S6i9LvebcDiTsPxzRTgtfHSRQF6</password>
-    <profile_image>uploads/profiles/1749737446_banner.png</profile_image>
+    <username>angga</username>
+    <email>angga@gmail.com</email>
+    <password>$2y$10$A5HLUuv0x17oCRhhS1pLOuzm5hk5qaJzf8KenQuJMdQ658o9xhwPG</password>
+    <profile_image>uploads/profile/default.png</profile_image>
   </user>
   <user>
     <id>3</id>
-    <username>ningrat</username>
-    <email>widan0001@gmail.com</email>
-    <password>$2y$10$SeUEqPrEA8mKvbWRUPDjuOi0B4QN8X8NpL7ETYxd2xLLvTRb023PC</password>
-    <profile_image>uploads/profiles/1749785546_produk4.png</profile_image>
-  </user>
-  <user>
-    <id>4</id>
-    <username>angga</username>
-    <email>angga@mail.com</email>
-    <password>$2y$10$GNyGeWU2MxtFwbGRmGoD/uyEFu7NFo17oYlpQvnrYgPEgFdY.hCa6</password>
-    <profile_image>uploads/profile/default.png</profile_image>
-  </user>
-  <user>
-    <id>5</id>
-    <username>widi</username>
-    <email>test@email.com</email>
-    <password>$2y$10$osxmvl7Zv3yuqi0rFJK4iObP7SLCgIn6o2m.Ib/Ux/WHh9nlLJIDW</password>
-    <profile_image>uploads/profile/1749872121_Bananavarieties.jpg</profile_image>
-  </user>
-  <user>
-    <id>7</id>
-    <username>angga</username>
-    <email>widan00801@gmail.com</email>
-    <password>$2y$10$0NAZr.ueH5KIItwKeMrdzO6R6mIV9npRApwIE0NtE6/5u1NzEi6ce</password>
-    <profile_image>uploads/profile/default.png</profile_image>
-  </user>
-  <user>
-    <id>8</id>
-    <username>admin</username>
-    <email>admin@gmail.com</email>
-    <password>$2y$10$oHtBwuJr/MejW2aVQN07OejXROP6eI.itjQrvWuQXc16HSL2sLQKW</password>
+    <username>saka</username>
+    <email>saka@gmail.com</email>
+    <password>$2y$10$izyeacYcJBKH800OSOzbkuiPbV4CWHF3.WJWImunL.3SU7J6KLomS</password>
     <profile_image>uploads/profile/default.png</profile_image>
   </user>
 </users>

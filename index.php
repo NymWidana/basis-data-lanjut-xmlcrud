@@ -97,6 +97,7 @@ if ($page < 1) {
 
 $start         = ($page - 1) * $postsPerPage;
 $postsToDisplay = array_slice($posts, $start, $postsPerPage);
+
 ?>
 
 <body class="bg-gray-100">
@@ -127,34 +128,43 @@ $postsToDisplay = array_slice($posts, $start, $postsPerPage);
             <!-- Responsive Grid -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <?php foreach ($postsToDisplay as $post): ?>
-                    <div class="bg-white rounded shadow p-4">
+                    <div class="bg-white rounded shadow p-4 flex flex-col h-full">
                         <h2 class="text-2xl font-bold mb-2">
                             <a href="views/post_show.php?id=<?php echo $post['id']; ?>" 
-                               class="text-blue-500 hover:underline line-clamp-1">
+                            class="text-blue-500 hover:underline line-clamp-1">
                                 <?php echo htmlspecialchars($post['title']); ?>
                             </a>
                         </h2>
+                        <!-- author info -->
                         <?php
-                            // Use the DOM-based getUserById to retrieve the author's info.
-                            $authorNode = getUserById($post['author_id']);
-                            if ($authorNode) {
-                                $authorXPath = new DOMXPath($authorNode->ownerDocument);
-                                $authorUsername = $authorXPath->query("username", $authorNode)->item(0)->nodeValue;
-                            }
-                        ?>
-                        <?php if (isset($authorUsername)): ?>
+                        // ----------------------------------------------------------------------
+                        // Lookup the Post's Author using the DOM-based user model.
+                        // ----------------------------------------------------------------------
+                        $authorNode = getUserById($post['author_id']);
+                        if ($authorNode) {
+                            $xpathUser = new DOMXPath($authorNode->ownerDocument);
+                            $authorUsername = $xpathUser->query("username", $authorNode)->item(0)->nodeValue;
+                        }
+    
+                        if (isset($authorUsername)): ?>
                             <p class="text-sm text-gray-500 mb-2">By <?php echo htmlspecialchars($authorUsername); ?></p>
                         <?php else: ?>
                             <p class="text-sm text-gray-500 mb-2 text-red-900 italic">By Deleted User</p>
                         <?php endif; ?>
+
+                        <!-- image -->
                         <?php if (!empty($post['hero_image'])): ?>
-                            <img src="<?php echo htmlspecialchars($post['hero_image']); ?>" 
-                                 alt="Hero Image" class="w-full h-auto mb-4">
+                            <img src="/<?php echo htmlspecialchars($post['hero_image']); ?>" 
+                                alt="Hero Image" class="w-full h-auto mb-4">
                         <?php endif; ?>
+
+                        <!-- post content -->
                         <p class="text-gray-700 mb-4 line-clamp-4">
                             <?php echo nl2br(htmlspecialchars($post['content'])); ?>
                         </p>
-                        <div class="flex items-center justify-between">
+
+                        <!-- footer sticks to bottom -->
+                        <div class="mt-auto flex items-center justify-between pt-4 border-t border-gray-200">
                             <div>
                                 <button onclick="vote('<?php echo $post['id']; ?>', 'upvote')" class="text-green-600 mr-2">
                                     <i class="fa fa-thumbs-up"></i> <span id="upvote-<?php echo $post['id']; ?>"><?php echo $post['upvotes']; ?></span>

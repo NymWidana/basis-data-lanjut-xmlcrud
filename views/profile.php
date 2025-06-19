@@ -137,30 +137,36 @@ switch ($sortOption) {
                 <p class="text-center text-gray-600">You haven't posted anything yet.</p>
             <?php else: ?>
                 <?php foreach ($userPosts as $post): ?>
-                    <div class="bg-white rounded shadow p-4">
+                    <div class="bg-white rounded shadow p-4 flex flex-col h-full">
                         <h3 class="text-2xl font-bold mb-2">
-                            <a href="post_show.php?id=<?php echo $post['id']; ?>" class="text-blue-500 hover:underline">
+                            <a href="post_show.php?id=<?php echo $post['id']; ?>" class="text-blue-500 hover:underline line-clamp-1">
                                 <?php echo htmlspecialchars($post['title']); ?>
                             </a>
                         </h3>
+
                         <?php if (!empty($post['hero_image'])): ?>
                             <img src="../<?php echo htmlspecialchars($post['hero_image']); ?>" alt="Hero Image" class="w-full h-auto mb-2">
                         <?php endif; ?>
-                        <p class="text-gray-700 mb-2">
+
+                        <p class="text-gray-700 mb-2 line-clamp-3">
                             <?php echo nl2br(htmlspecialchars($post['content'])); ?>
                         </p>
-                        <div class="text-sm text-gray-500">
-                            Posted on <?php echo date("M d, Y", strtotime($post['created_at'])); ?>
-                        </div>
-                        <div class="mt-1">
-                            <a href="forms/editPost.php?id=<?php echo $post['id']; ?>" class="text-blue-500 hover:underline text-sm mr-2">
-                                <i class="fas fa-edit"></i> Edit Post
-                            </a>
-                            <a href="../controllers/postController.php?action=delete&post_id=<?php echo $post['id']; ?>" 
-                               class="text-red-500 text-sm" 
-                               onclick="return confirm('Are you sure you want to delete this post?');">
-                                <i class="fas fa-trash"></i> Delete
-                            </a>
+
+                        <!-- Sticky footer section -->
+                        <div class="mt-auto pt-4 border-t border-gray-200">
+                            <div class="text-sm text-gray-500 mb-2">
+                                Posted on <?php echo date("M d, Y", strtotime($post['created_at'])); ?>
+                            </div>
+                            <div>
+                                <a href="forms/editPost.php?id=<?php echo $post['id']; ?>" class="text-blue-500 hover:underline text-sm mr-2">
+                                    <i class="fas fa-edit"></i> Edit Post
+                                </a>
+                                <a href="../controllers/postController.php?action=delete&post_id=<?php echo $post['id']; ?>" 
+                                class="text-red-500 text-sm" 
+                                onclick="return confirm('Are you sure you want to delete this post?');">
+                                    <i class="fas fa-trash"></i> Delete
+                                </a>
+                            </div>
                         </div>
                     </div>
                 <?php endforeach; ?>

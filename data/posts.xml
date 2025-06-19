@@ -2,94 +2,130 @@
 <posts>
   <post>
     <id>1</id>
-    <title>apel</title>
-    <hero_image>uploads/post/1749827294_produk4.png</hero_image>
-    <content>Apel merupakan jenis buah-buahan, atau buah yang dihasilkan dari pohon apel. Buah apel biasanya berwarna merah kulitnya jika masak dan siap dimakan, tetapi bisa juga kulitnya berwarna hijau atau kuning. Kulit buahnya agak lembek dan daging buahnya keras. Buah apel memiliki beberapa biji di dalamnya.</content>
-    <author_id>3</author_id>
-    <created_at>2025-06-13 15:08:14</created_at>
+    <title>The Journey Begins</title>
+    <hero_image>uploads/post/journey.png</hero_image>
+    <content>Once upon a time in a land of code, a beginner set out on an epic adventure of learning and discovery.</content>
+    <author_id>1</author_id>
+    <created_at>2025-06-19 08:15:00</created_at>
+    <upvotes/>
+    <downvotes/>
+    <votes/>
+  </post>
+  <post>
+    <id>2</id>
+    <title>Adventure in Code Land</title>
+    <hero_image>uploads/post/adventure.png</hero_image>
+    <content>Deep in the realm of algorithms, our hero battles bugs and conquers challenges with every commit.</content>
+    <author_id>2</author_id>
+    <created_at>2025-06-19 09:30:00</created_at>
     <upvotes>1</upvotes>
-    <downvotes>2</downvotes>
+    <downvotes/>
     <votes>
-      <vote user_id="3" type="downvote"/>
-      <vote user_id="6" type="upvote"/>
-      <vote user_id="8" type="downvote"/>
+      <vote user_id="1" type="upvote"/>
     </votes>
   </post>
   <post>
     <id>3</id>
-    <title>akun official instiki di instagram terkena hack, berikut menurut para ahli</title>
-    <hero_image>uploads/post/1749872007_Bananavarieties.jpg</hero_image>
-    <content>A banana is an elongated, edible fruit – botanically a berry[1] – produced by several kinds of large treelike herbaceous flowering plants in the genus Musa. In some countries, cooking bananas are called plantains, distinguishing them from dessert bananas. The fruit is variable in size, color and firmness, but is usually elongated and curved, with soft flesh rich in starch covered with a peel, which may have a variety of colors when ripe. It grows upward in clusters near the top of the plant. Almost all modern edible seedless (parthenocarp) cultivated bananas come from two wild species – Musa acuminata and Musa balbisiana, or hybrids of them.&#13;
-&#13;
-Musa species are native to tropical Indomalaya and Australia; they were probably domesticated in New Guinea. They are grown in 135 countries, primarily for their fruit, and to a lesser extent to make banana paper and textiles, while some are grown as ornamental plants. The world's largest producers of bananas in 2022 were India and China, which together accounted for approximately 26% of total production. Bananas are eaten raw or cooked in recipes varying from curries to banana chips, fritters, fruit preserves, or simply baked or steamed.&#13;
-&#13;
-Worldwide, there is no sharp distinction between dessert "bananas" and cooking "plantains": this distinction works well enough in the Americas and Europe, but it breaks down in Southeast Asia where many more kinds of bananas are grown and eaten. The term "banana" is applied also to other members of the genus Musa, such as the scarlet banana (Musa coccinea), the pink banana (Musa velutina), and the Fe'i bananas. Members of the genus Ensete, such as the snow banana (Ensete glaucum) and the economically important false banana (Ensete ventricosum) of Africa are sometimes included. Both genera are in the banana family, Musaceae.&#13;
-&#13;
-Banana plantations are subject to damage by parasitic nematodes and insect pests, and to fungal and bacterial diseases, one of the most serious being Panama disease which is caused by a Fusarium fungus. This and black sigatoka threaten the production of Cavendish bananas, the main kind eaten in the Western world, which is a triploid Musa acuminata. Plant breeders are seeking new varieties, but these are difficult to breed given that commercial varieties are seedless. To enable future breeding, banana germplasm is conserved in multiple gene banks around the world.&#13;
-&#13;
-Description</content>
-    <author_id>6</author_id>
-    <created_at>2025-06-14 03:33:27</created_at>
+    <title>Mysteries of the DOM</title>
+    <hero_image>uploads/post/dom_mystery.png</hero_image>
+    <content>The Document Object Model is not just a structure—it's a universe filled with magical nodes and dynamic transformations.</content>
+    <author_id>3</author_id>
+    <created_at>2025-06-19 10:45:00</created_at>
     <upvotes>1</upvotes>
-    <downvotes>0</downvotes>
+    <downvotes/>
     <votes>
-      <vote user_id="6" type="upvote"/>
+      <vote user_id="1" type="upvote"/>
     </votes>
   </post>
   <post>
     <id>4</id>
-    <title>test delete</title>
-    <hero_image/>
-    <content>test test test</content>
-    <author_id>6</author_id>
-    <created_at>2025-06-14 03:55:37</created_at>
-    <upvotes>1</upvotes>
+    <title>PHP: Legends and Myths</title>
+    <hero_image>uploads/post/php_legends.png</hero_image>
+    <content>In the ancient scrolls of PHP, legends tell of developers who turned code into masterpieces with just a few lines.</content>
+    <author_id>1</author_id>
+    <created_at>2025-06-19 11:00:00</created_at>
+    <upvotes/>
     <downvotes>1</downvotes>
     <votes>
-      <vote user_id="6" type="upvote"/>
-      <vote user_id="8" type="downvote"/>
+      <vote user_id="1" type="downvote"/>
     </votes>
   </post>
   <post>
     <id>5</id>
-    <title>test delete</title>
-    <hero_image>uploads/post/1749882662_Bananavarieties.jpg</hero_image>
-    <content>testtttttttt</content>
-    <author_id>7</author_id>
-    <created_at>2025-06-14 06:31:02</created_at>
-    <upvotes>0</upvotes>
-    <downvotes>0</downvotes>
+    <title>Debugging Conundrums</title>
+    <hero_image>uploads/post/debug.png</hero_image>
+    <content>Every error is a puzzle waiting to be solved. Our developers never back down from a challenge—even the most mysterious bugs.</content>
+    <author_id>2</author_id>
+    <created_at>2025-06-19 11:30:00</created_at>
+    <upvotes/>
+    <downvotes>1</downvotes>
+    <votes>
+      <vote user_id="1" type="downvote"/>
+    </votes>
   </post>
   <post>
     <id>6</id>
-    <title>test hilang</title>
-    <hero_image>uploads/post/1749882866_dasi.jpg</hero_image>
-    <content>dasi keren</content>
-    <author_id>8</author_id>
-    <created_at>2025-06-14 06:34:26</created_at>
-    <upvotes>0</upvotes>
+    <title>Infinite Loops and Beyond</title>
+    <hero_image>uploads/post/infinite.png</hero_image>
+    <content>Sometimes the code seems endless, looping over and over—but within that cycle lies the key to potential breakthroughs.</content>
+    <author_id>3</author_id>
+    <created_at>2025-06-19 12:00:00</created_at>
+    <upvotes>1</upvotes>
     <downvotes>0</downvotes>
+    <votes>
+      <vote user_id="1" type="upvote"/>
+    </votes>
   </post>
   <post>
     <id>7</id>
-    <title>Chemical Equipment</title>
-    <hero_image>uploads/post/1750331783_WhatsApp Image 2024-10-09 at 17.05.32.jpeg</hero_image>
-    <content>ssssss</content>
-    <author_id>8</author_id>
-    <created_at>2025-06-19 11:00:06</created_at>
-    <upvotes>0</upvotes>
-    <downvotes>0</downvotes>
-    <votes/>
+    <title>Refactoring: A New Dawn</title>
+    <hero_image>uploads/post/refactor.png</hero_image>
+    <content>When the old code can no longer support the weight of new features, it's time to refactor and embrace a cleaner, leaner design.</content>
+    <author_id>1</author_id>
+    <created_at>2025-06-19 12:30:00</created_at>
+    <upvotes/>
+    <downvotes>1</downvotes>
+    <votes>
+      <vote user_id="1" type="downvote"/>
+    </votes>
   </post>
   <post>
     <id>8</id>
-    <title>test delete</title>
-    <hero_image/>
-    <content>sdsad</content>
-    <author_id>8</author_id>
-    <created_at>2025-06-19 11:53:28</created_at>
-    <upvotes>0</upvotes>
-    <downvotes>0</downvotes>
-    <votes/>
+    <title>The Algorithmic Quest</title>
+    <hero_image>uploads/post/algorithm.png</hero_image>
+    <content>In a quest to optimize every process, developers journey through the labyrinth of algorithms, seeking the most efficient solutions.</content>
+    <author_id>2</author_id>
+    <created_at>2025-06-19 13:00:00</created_at>
+    <upvotes>1</upvotes>
+    <downvotes/>
+    <votes>
+      <vote user_id="1" type="upvote"/>
+    </votes>
+  </post>
+  <post>
+    <id>9</id>
+    <title>Embracing the Future</title>
+    <hero_image>uploads/post/future.png</hero_image>
+    <content>The future is bright—as developers continue to innovate, tomorrow's technology is shaped by today’s creative minds.</content>
+    <author_id>3</author_id>
+    <created_at>2025-06-19 13:30:00</created_at>
+    <upvotes/>
+    <downvotes>1</downvotes>
+    <votes>
+      <vote user_id="1" type="downvote"/>
+    </votes>
+  </post>
+  <post>
+    <id>10</id>
+    <title>Code, Coffee &amp; Creativity</title>
+    <hero_image>uploads/post/coffeecode.png</hero_image>
+    <content>Fuelled by coffee and driven by passion, every line of code is a testament to creativity and sleepless nights.</content>
+    <author_id>1</author_id>
+    <created_at>2025-06-19 14:00:00</created_at>
+    <upvotes>1</upvotes>
+    <downvotes/>
+    <votes>
+      <vote user_id="1" type="upvote"/>
+    </votes>
   </post>
 </posts>

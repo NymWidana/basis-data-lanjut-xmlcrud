@@ -52,7 +52,7 @@ function getNextUserIDFromXML($dom) {
  * @param string $profileImage (Optional) The profile image file path.
  * @return bool Returns true if saved successfully.
  */
-function createUser($username, $email, $hashedPassword, $profileImage = 'uploads/profile/default.png') {
+function createUser($username, $email, $hashedPassword, $profileImage = 'default.png') {
     $dom = loadUserDOM();
     $root = $dom->documentElement; // <users> node
 
