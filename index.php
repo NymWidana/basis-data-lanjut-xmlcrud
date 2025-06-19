@@ -97,6 +97,15 @@ if ($page < 1) {
 
 $start         = ($page - 1) * $postsPerPage;
 $postsToDisplay = array_slice($posts, $start, $postsPerPage);
+
+// ----------------------------------------------------------------------
+// Lookup the Post's Author using the DOM-based user model.
+// ----------------------------------------------------------------------
+$authorNode = getUserById($postToShow['author_id']);
+if ($authorNode) {
+    $xpathUser = new DOMXPath($authorNode->ownerDocument);
+    $authorUsername = $xpathUser->query("username", $authorNode)->item(0)->nodeValue;
+}
 ?>
 
 <body class="bg-gray-100">
