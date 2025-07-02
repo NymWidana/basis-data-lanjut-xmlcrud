@@ -1,68 +1,104 @@
 <?php
-session_start();
-include_once '../includes/functions.php';
-include_once '../models/userModel.php'; // Use the new DOM-based user model
+session_start();                              // Start session to track authentication state
+include_once '../includes/functions.php';     // Helpers: sanitizeInput(), etc.
+require_once '../models/userModel.php';       // DOM-based user model: getUserByUsername(), createUser()
 
-$action = $_GET['action'] ?? ($_POST['action'] ?? '');
-
-// Login: verifies user credentials and initiates a session.
-if ($action === 'login') {
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $username = sanitizeInput($_POST['username']);
-        $password = $_POST['password'];  // Plain input; assume it's hashed in XML
-
-        // Get the user node using our DOM-based helper.
-        $userNode = getUserByUsername($username);
-        if ($userNode) {
-            $xpath = new DOMXPath($userNode->ownerDocument);
-            $passwordNode = $xpath->query("password", $userNode)->item(0);
-            if ($passwordNode && password_verify($password, $passwordNode->nodeValue)) {
-                $_SESSION['user'] = [
-                    'id'            => $xpath->query("id", $userNode)->item(0)->nodeValue,
-                    'username'      => $xpath->query("username", $userNode)->item(0)->nodeValue,
-                    'email'         => $xpath->query("email", $userNode)->item(0)->nodeValue,
-                    'profile_image' => $xpath->query("profile_image", $userNode)->item(0)->nodeValue
-                ];
-                header("Location: ../index.php");
-                exit;
-            }
-        }
-        // Redirect back with an error if credentials don't match.
-        header("Location: ../views/forms/login.php?error=1");
+/**
+ * Handle user login: verify credentials and initialize session.
+ */
+function handleLogin()
+{
+    // Only accept POST submissions
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        header("Location: ../views/forms/login.php");
         exit;
     }
-}
 
-// Logout: destroys the user session.
-elseif ($action === 'logout') {
-    unset($_SESSION['user']);
-    session_destroy();
-    header("Location: ../index.php");
-    exit;
-}
+    // Sanitize inputs from login form
+    $username = sanitizeInput($_POST['username'] ?? '');
+    $password = $_POST['password'] ?? '';  // Plain-text; XML stores hashed password
 
-// Registration: creates a new user and saves it using the DOM-based model.
-elseif ($action === 'register') {
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $username = sanitizeInput($_POST['username']);
-        $email    = sanitizeInput($_POST['email']);
-        $password = $_POST['password'];
-        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-        $profileImage = 'uploads/profile/default.png';  // Default profile image fallback.
-        
-        // Attempt to create a new user.
-        if (createUser($username, $email, $hashedPassword, $profileImage)) {
-            header("Location: ../views/forms/login.php?registered=1");
+    // Look up the <user> node by username
+    $userNode = getUserByUsername($username);
+    if ($userNode) {
+        $dom    = $userNode->ownerDocument;
+        $xpath  = new DOMXPath($dom);
+        $pwNode = $xpath->query("password", $userNode)->item(0);
+
+        // Verify password hash
+        if ($pwNode && password_verify($password, $pwNode->nodeValue)) {
+            // Fetch user details into session
+            $_SESSION['user'] = [
+                'id'            => $xpath->query("id",            $userNode)->item(0)->nodeValue,
+                'username'      => $xpath->query("username",      $userNode)->item(0)->nodeValue,
+                'email'         => $xpath->query("email",         $userNode)->item(0)->nodeValue,
+                'profile_image' => $xpath->query("profile_image",$userNode)->item(0)->nodeValue
+            ];
+            header("Location: ../index.php");
             exit;
-        } else {
-            die("Registration failed. Please try again.");
         }
     }
+
+    // Invalid credentials: redirect back with error flag
+    header("Location: ../views/forms/login.php?error=1");
+    exit;
 }
 
-// Fallback: if no valid action is defined, redirect to home.
-else {
+/**
+ * Handle user logout: clear session and redirect home.
+ */
+function handleLogout()
+{
+    unset($_SESSION['user']);  // Remove user data
+    session_destroy();          // Destroy entire session
     header("Location: ../index.php");
     exit;
 }
-?>
+
+/**
+ * Handle user registration: create a new user in XML and redirect.
+ */
+function handleRegister()
+{
+    // Only accept POST submissions
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        header("Location: ../views/forms/register.php");
+        exit;
+    }
+
+    // Sanitize and collect form inputs
+    $username = sanitizeInput($_POST['username'] ?? '');
+    $email    = sanitizeInput($_POST['email']    ?? '');
+    $password = $_POST['password'] ?? '';
+    $hashed   = password_hash($password, PASSWORD_DEFAULT);
+    // Default profile image for new users
+    $defaultAvatar = 'uploads/profile/default.png';
+
+    // Delegate creation to DOM-based model
+    if (createUser($username, $email, $hashed, $defaultAvatar)) {
+        // On success, redirect to login with a 'registered' flag
+        header("Location: ../views/forms/login.php?registered=1");
+        exit;
+    }
+
+    // Creation failed: show an error
+    die("Registration failed. Please try again.");
+}
+
+/**
+ * Dispatch table mapping URL actions to handlers.
+ */
+$action   = $_GET['action'] ?? $_POST['action'] ?? '';
+$handlers = [
+    'login'    => 'handleLogin',
+    'logout'   => 'handleLogout',
+    'register' => 'handleRegister',
+];
+
+// Invoke the matching handler or redirect home on invalid action
+if (isset($handlers[$action])) {
+    $handlers[$action]();
+} else {
+    header("Location: ../index.php");
+    exit;
+}

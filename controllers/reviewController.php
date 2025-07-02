@@ -1,103 +1,130 @@
 <?php
-session_start();
-include_once '../includes/functions.php';
-require_once '../models/reviewModel.php';
+session_start();                                // Start session to track the logged-in user
+include_once '../includes/functions.php';       // Helpers: sanitizeInput(), date helpers, XML loaders
+require_once '../models/reviewModel.php';       // DOM-based review model: loadReviewDOM(), createReview(), etc.
 
-$action = $_POST['action'] ?? ($_GET['action'] ?? '');
+/**
+ * Create a new review under a post.
+ */
+function handleCreate()
+{
+    // Only accept POST submissions
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        header("Location: ../index.php");
+        exit;
+    }
 
-// Require authentication for review operations.
+    // Sanitize inputs from form
+    $postId    = sanitizeInput($_POST['post_id'] ?? '');
+    $comment   = sanitizeInput($_POST['comment'] ?? '');
+    $userId    = $_SESSION['user']['id'];
+    $createdAt = date("Y-m-d H:i:s");
+
+    // Delegate to the DOM-based model to append <review>
+    if (createReview($postId, $userId, $comment, $createdAt)) {
+        // Success → back to the post’s detail page
+        header("Location: ../views/post_show.php?id={$postId}");
+    } else {
+        // Failure → include error flag
+        header("Location: ../views/post_show.php?id={$postId}&error=create");
+    }
+    exit;
+}
+
+/**
+ * Update an existing review.
+ */
+function handleUpdate()
+{
+    // Only accept POST submissions
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        header("Location: ../index.php");
+        exit;
+    }
+
+    // Sanitize inputs
+    $reviewId       = sanitizeInput($_POST['review_id'] ?? '');
+    $updatedComment = sanitizeInput($_POST['comment']   ?? '');
+    $postId         = sanitizeInput($_POST['post_id']   ?? '');
+
+    // Load the review node by ID
+    $reviewNode = getReviewById($reviewId);
+    if (!$reviewNode) {
+        // Review not found → back to post page
+        header("Location: ../views/post_show.php?id={$postId}");
+        exit;
+    }
+
+    // Verify ownership: only the author can update
+    $dom   = $reviewNode->ownerDocument;
+    $xpath = new DOMXPath($dom);
+    $owner = $xpath->query("user_id", $reviewNode)->item(0)->nodeValue;
+    if ($owner !== $_SESSION['user']['id']) {
+        // Unauthorized → ignore
+        header("Location: ../views/post_show.php?id={$postId}");
+        exit;
+    }
+
+    // Delegate to DOM model to update text and timestamp
+    if (updateReview($reviewId, $updatedComment, date("Y-m-d H:i:s"))) {
+        header("Location: ../views/post_show.php?id={$postId}");
+    } else {
+        header("Location: ../views/post_show.php?id={$postId}&error=update");
+    }
+    exit;
+}
+
+/**
+ * Delete a review.
+ */
+function handleDelete()
+{
+    // Require both review_id & post_id as GET parameters
+    if (!isset($_GET['review_id'], $_GET['post_id'])) {
+        header("Location: ../index.php");
+        exit;
+    }
+
+    $reviewId = sanitizeInput($_GET['review_id']);
+    $postId   = sanitizeInput($_GET['post_id']);
+
+    // Load the review node
+    $reviewNode = getReviewById($reviewId);
+    if ($reviewNode) {
+        // Check ownership before deleting
+        $dom   = $reviewNode->ownerDocument;
+        $xpath = new DOMXPath($dom);
+        $owner = $xpath->query("user_id", $reviewNode)->item(0)->nodeValue;
+        if ($owner === $_SESSION['user']['id']) {
+            deleteReview($reviewId);
+        }
+    }
+
+    // Return to the post’s detail page
+    header("Location: ../views/post_show.php?id={$postId}");
+    exit;
+}
+
+// ----------------------------------------------------------------------
+// Dispatch table: maps action names to handler functions
+// ----------------------------------------------------------------------
+$action   = $_POST['action'] ?? $_GET['action'] ?? '';
+$handlers = [
+    'create' => 'handleCreate',
+    'update' => 'handleUpdate',
+    'delete' => 'handleDelete',
+];
+
+// Require login for any review action
 if (!isset($_SESSION['user'])) {
     header("Location: ../views/forms/login.php");
     exit;
 }
 
-// ----------------------------------------------------------------------
-// Create: Add a new review using DOM-based functions.
-// ----------------------------------------------------------------------
-if ($action === 'create') {
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $postId   = sanitizeInput($_POST['post_id']);
-        $comment  = sanitizeInput($_POST['comment']);
-        $userId   = $_SESSION['user']['id'];
-        $createdAt = date("Y-m-d H:i:s");
-
-        // Call the DOM-based function to create the review.
-        if (createReview($postId, $userId, $comment, $createdAt)) {
-            header("Location: ../views/post_show.php?id=" . $postId);
-            exit;
-        } else {
-            // Handle error (optionally display a message)
-            header("Location: ../views/post_show.php?id=" . $postId . "&error=create");
-            exit;
-        }
-    }
-}
-
-// ----------------------------------------------------------------------
-// Update: Update an existing review using DOM-based functions.
-// ----------------------------------------------------------------------
-elseif ($action === 'update') {
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $reviewId       = sanitizeInput($_POST['review_id']);
-        $updatedComment = sanitizeInput($_POST['comment']);
-        $postId         = sanitizeInput($_POST['post_id']);
-
-        // Retrieve the review node (using our DOM model function).
-        $reviewNode = getReviewById($reviewId);
-        if (!$reviewNode) {
-            // Review not found: redirect back.
-            header("Location: ../views/post_show.php?id=" . $postId);
-            exit;
-        }
-        
-        // Check if the logged-in user is the owner.
-        $dom    = $reviewNode->ownerDocument;
-        $xpath  = new DOMXPath($dom);
-        /** @var DOMElement $userNode */
-        $userNode = $xpath->query("user_id", $reviewNode)->item(0);
-        if (!$userNode || ((string)$userNode->nodeValue !== $_SESSION['user']['id'])) {
-            header("Location: ../views/post_show.php?id=" . $postId);
-            exit;
-        }
-        
-        // Update the review using our DOM-based update function.
-        if (updateReview($reviewId, $updatedComment, date("Y-m-d H:i:s"))) {
-            header("Location: ../views/post_show.php?id=" . $postId);
-            exit;
-        } else {
-            header("Location: ../views/post_show.php?id=" . $postId . "&error=update");
-            exit;
-        }
-    }
-}
-
-// ----------------------------------------------------------------------
-// Delete: Remove a review using DOM-based functions.
-// ----------------------------------------------------------------------
-elseif ($action === 'delete') {
-    if (isset($_GET['review_id']) && isset($_GET['post_id'])) {
-        $reviewId = sanitizeInput($_GET['review_id']);
-        $postId   = sanitizeInput($_GET['post_id']);
-
-        $reviewNode = getReviewById($reviewId);
-        if ($reviewNode) {
-            $dom    = $reviewNode->ownerDocument;
-            $xpath  = new DOMXPath($dom);
-            /** @var DOMElement $userNode */
-            $userNode = $xpath->query("user_id", $reviewNode)->item(0);
-            // Only allow deletion if the review belongs to the logged-in user.
-            if ($userNode && (string)$userNode->nodeValue === $_SESSION['user']['id']) {
-                deleteReview($reviewId);
-            }
-        }
-        header("Location: ../views/post_show.php?id=" . $postId);
-        exit;
-    }
-}
-
-// Fallback: redirect to home if no valid action is provided.
-else {
+// Invoke the matching handler or fallback to home
+if (isset($handlers[$action])) {
+    $handlers[$action]();
+} else {
     header("Location: ../index.php");
     exit;
 }
-?>

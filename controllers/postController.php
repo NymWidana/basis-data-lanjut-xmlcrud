@@ -1,281 +1,288 @@
 <?php
-session_start();
-include_once '../includes/functions.php';
-require_once '../models/postModel.php';
+session_start();                            // Start PHP session to track logged-in user
+include_once '../includes/functions.php';   // Include shared helper functions (e.g., sanitizeInput, XML loaders)
+require_once '../models/postModel.php';     // Include the DOM-based post model (loadPostDOM, savePostDOM, createPost, etc.)
 
-$action = $_POST['action'] ?? ($_GET['action'] ?? '');
+/**
+ * Subroutine: record a new <vote> element and bump count.
+ */
+function recordNewVote($dom, $xpath, $post, $votesElem, $userId, $type)
+{
+    // Create <vote user_id="..." type="..."/>
+    $newVote = $dom->createElement("vote");
+    $newVote->setAttribute("user_id", $userId);
+    $newVote->setAttribute("type",    $type);
+    $votesElem->appendChild($newVote);
 
-// ----------------------------------------------------------------------
-// Vote: Process an upvote/downvote on a post using the DOM model
-// ----------------------------------------------------------------------
-if ($action === 'vote') {
-    // Ensure the user is logged in before voting.
+    // Increment the matching <upvotes> or <downvotes> count
+    $countNode = $xpath->query($type . 's', $post)->item(0);
+    $countNode->nodeValue = intval($countNode->nodeValue) + 1;
+}
+
+/**
+ * Subroutine: toggle or switch an existing vote element.
+ */
+function toggleVote($dom, $xpath, $post, $votesElem, $existingVote, $newType)
+{
+    // Determine the old vote type
+    $oldType   = $existingVote->getAttribute("type");
+    $upNode    = $xpath->query("upvotes",   $post)->item(0);
+    $downNode  = $xpath->query("downvotes", $post)->item(0);
+
+    // Decrement the old vote counter
+    if ($oldType === 'upvote') {
+        $upNode->nodeValue = max(0, intval($upNode->nodeValue) - 1);
+    } else {
+        $downNode->nodeValue = max(0, intval($downNode->nodeValue) - 1);
+    }
+
+    if ($oldType === $newType) {
+        // Same vote clicked again → remove it entirely
+        $votesElem->removeChild($existingVote);
+    } else {
+        // Switching vote type → update attribute and increment new counter
+        $existingVote->setAttribute('type', $newType);
+        $targetNode = ($newType === 'upvote' ? $upNode : $downNode);
+        $targetNode->nodeValue = intval($targetNode->nodeValue) + 1;
+    }
+}
+
+/**
+ * Handle AJAX voting on a post.
+ */
+function handleVote()
+{
+    // 1. Ensure user is logged in
     if (!isset($_SESSION['user'])) {
-        echo json_encode(['success' => false, 'message' => 'Please login to vote.']);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Please login to vote.'
+        ]);
         exit;
     }
-    
-    $postId   = sanitizeInput($_POST['postId'] ?? '');
-    $voteType = sanitizeInput($_POST['voteType'] ?? '');
-    $currentUserId = $_SESSION['user']['id'];
-    
-    // Validate vote type.
-    if (!in_array($voteType, ['upvote', 'downvote'])) {
-        echo json_encode(['success' => false, 'message' => 'Invalid vote type.']);
+
+    // 2. Sanitize incoming POST parameters
+    $postId      = sanitizeInput($_POST['postId']   ?? '');
+    $voteType    = sanitizeInput($_POST['voteType'] ?? '');
+    $currentUser = $_SESSION['user']['id'];
+
+    // 3. Validate vote type
+    if (!in_array($voteType, ['upvote','downvote'])) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Invalid vote type.'
+        ]);
         exit;
     }
-    
-    // Load the posts DOM document using our post model function.
-    $dom = loadPostDOM();
+
+    // 4. Load the XML DOM and prepare XPath
+    $dom   = loadPostDOM();               
     $xpath = new DOMXPath($dom);
-    
-    // Query for the post with the given id.
-    $query  = sprintf("//post[id/text()='%s']", $postId);
-    $postNode = $xpath->query($query)->item(0);
-    if (!$postNode) {
-        echo json_encode(['success' => false, 'message' => 'Post not found.']);
+
+    // 5. Locate the <post> node by ID
+    $post = $xpath
+        ->query(sprintf("//post[id/text()='%s']", $postId))
+        ->item(0);
+    if (!$post) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Post not found.'
+        ]);
         exit;
     }
-    
-    // Ensure that a <votes> element exists under the post.
-    $votesNodes = $xpath->query("votes", $postNode);
-    if ($votesNodes->length === 0) {
+
+    // 6. Ensure a <votes> container exists, or create it
+    $votesList = $xpath->query("votes", $post);
+    if ($votesList->length === 0) {
         $votesElem = $dom->createElement("votes");
-        $postNode->appendChild($votesElem);
+        $post->appendChild($votesElem);
     } else {
-        $votesElem = $votesNodes->item(0);
+        $votesElem = $votesList->item(0);
     }
-    
-    // Check if the current user has already voted.
-    $voteQuery = sprintf("vote[@user_id='%s']", $currentUserId);
-    $existingVotes = $xpath->query($voteQuery, $votesElem);
-    
-    if ($existingVotes->length === 0) {
-        // No previous vote: record the new vote.
-        $newVote = $dom->createElement("vote");
-        $newVote->setAttribute("user_id", $currentUserId);
-        $newVote->setAttribute("type", $voteType);
-        $votesElem->appendChild($newVote);
-        
-        // Update vote counts.
-        $upvotesNodes = $xpath->query("upvotes", $postNode);
-        $downvotesNodes = $xpath->query("downvotes", $postNode);
-        if ($voteType === 'upvote' && $upvotesNodes->length > 0) {
-            $currentUpvotes = intval($upvotesNodes->item(0)->nodeValue);
-            $upvotesNodes->item(0)->nodeValue = $currentUpvotes + 1;
-        } elseif ($voteType === 'downvote' && $downvotesNodes->length > 0) {
-            $currentDownvotes = intval($downvotesNodes->item(0)->nodeValue);
-            $downvotesNodes->item(0)->nodeValue = $currentDownvotes + 1;
-        }
+
+    // 7. Check for an existing <vote> by this user
+    $existing = $xpath
+        ->query(sprintf("vote[@user_id='%s']", $currentUser), $votesElem);
+
+    // 8. If no previous vote, record a new one; else toggle or switch it
+    if ($existing->length === 0) {
+        recordNewVote($dom, $xpath, $post, $votesElem, $currentUser, $voteType);
     } else {
-        // A previous vote exists.
-        $existingVote = $existingVotes->item(0);
-        
-        /** @var DOMElement|null $existingVote */
-        $currentVoteType = $existingVote->getAttribute("type");
-        
-        if ($currentVoteType === $voteType) {
-            // Same vote clicked: cancel the vote.
-            if ($voteType === 'upvote') {
-                $upvotesNodes = $xpath->query("upvotes", $postNode);
-                if ($upvotesNodes->length > 0) {
-                    $currentUpvotes = intval($upvotesNodes->item(0)->nodeValue);
-                    $upvotesNodes->item(0)->nodeValue = max(0, $currentUpvotes - 1);
-                }
-            } else {
-                $downvotesNodes = $xpath->query("downvotes", $postNode);
-                if ($downvotesNodes->length > 0) {
-                    $currentDownvotes = intval($downvotesNodes->item(0)->nodeValue);
-                    $downvotesNodes->item(0)->nodeValue = max(0, $currentDownvotes - 1);
-                }
-            }
-            $votesElem->removeChild($existingVote);
-        } else {
-            // Different vote: switch the vote.
-            if ($currentVoteType === 'upvote') {
-                // Switch from upvote to downvote.
-                $upvotesNodes = $xpath->query("upvotes", $postNode);
-                if ($upvotesNodes->length > 0) {
-                    $currentUpvotes = intval($upvotesNodes->item(0)->nodeValue);
-                    $upvotesNodes->item(0)->nodeValue = max(0, $currentUpvotes - 1);
-                }
-                $downvotesNodes = $xpath->query("downvotes", $postNode);
-                if ($downvotesNodes->length > 0) {
-                    $currentDownvotes = intval($downvotesNodes->item(0)->nodeValue);
-                    $downvotesNodes->item(0)->nodeValue = $currentDownvotes + 1;
-                }
-            } else {
-                // Switch from downvote to upvote.
-                $downvotesNodes = $xpath->query("downvotes", $postNode);
-                if ($downvotesNodes->length > 0) {
-                    $currentDownvotes = intval($downvotesNodes->item(0)->nodeValue);
-                    $downvotesNodes->item(0)->nodeValue = max(0, $currentDownvotes - 1);
-                }
-                $upvotesNodes = $xpath->query("upvotes", $postNode);
-                if ($upvotesNodes->length > 0) {
-                    $currentUpvotes = intval($upvotesNodes->item(0)->nodeValue);
-                    $upvotesNodes->item(0)->nodeValue = $currentUpvotes + 1;
-                }
-            }
-            // Update the existing vote type.
-            $existingVote->setAttribute("type", $voteType);
-        }
+        toggleVote($dom, $xpath, $post, $votesElem, $existing->item(0), $voteType);
     }
-    
-    // Save the updated post XML.
+
+    // 9. Persist changes back to posts.xml
     savePostDOM($dom);
-    
-    // Retrieve the updated vote counts.
-    $upvotesNode = $xpath->query("upvotes", $postNode)->item(0);
-    $downvotesNode = $xpath->query("downvotes", $postNode)->item(0);
-    
+
+    // 10. Fetch updated <upvotes> & <downvotes> counts for JSON response
+    $upNode   = $xpath->query("upvotes",   $post)->item(0);
+    $downNode = $xpath->query("downvotes", $post)->item(0);
+
     echo json_encode([
         'success'   => true,
-        'upvotes'   => intval($upvotesNode->nodeValue),
-        'downvotes' => intval($downvotesNode->nodeValue)
+        'upvotes'   => intval($upNode->nodeValue),
+        'downvotes' => intval($downNode->nodeValue),
     ]);
     exit;
 }
 
-// ----------------------------------------------------------------------
-// Create: Create a new post using the DOM-based post model.
-// ----------------------------------------------------------------------
-elseif ($action === 'create') {
-    // Ensure the user is logged in.
+/**
+ * Handle creation of a new post.
+ */
+function handleCreate()
+{
+    // Redirect guests to login form
     if (!isset($_SESSION['user'])) {
         header("Location: ../views/forms/login.php");
         exit;
     }
-    
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $title   = sanitizeInput($_POST['title']);
-        $content = sanitizeInput($_POST['content']);
-        $authorId= $_SESSION['user']['id'];
-        
-        // Handle file upload for the hero image.
-        $heroImagePath = '';
-        if (isset($_FILES['hero_image']) && $_FILES['hero_image']['error'] == 0) {
-            $uploadDir = '../uploads/post/';
-            if (!file_exists($uploadDir)) {
-                mkdir($uploadDir, 0777, true);
-            }
-            $filename   = time() . '_' . basename($_FILES['hero_image']['name']);
-            $targetFile = $uploadDir . $filename;
-            if (move_uploaded_file($_FILES['hero_image']['tmp_name'], $targetFile)) {
-                $heroImagePath = 'uploads/post/' . $filename;
-            }
-        }
-        
-        // Use our DOM-based post model to create the new post.
-        if (createPost($title, $heroImagePath, $content, $authorId)) {
-            header("Location: ../index.php");
+
+    // Only respond to POST submissions
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        header("Location: ../index.php");
+        exit;
+    }
+
+    // Sanitize title and content
+    $title    = sanitizeInput($_POST['title']   ?? '');
+    $content  = sanitizeInput($_POST['content'] ?? '');
+    $authorId = $_SESSION['user']['id'];
+
+    // Process optional hero image upload and get relative path
+    $heroPath = uploadFile($_FILES['hero_image'] ?? null, '../uploads/post/');
+
+    // Delegate to model to append a new <post> node in XML
+    if (createPost($title, $heroPath, $content, $authorId)) {
+        header("Location: ../index.php");  // Success → back to home
+    } else {
+        echo "Failed to create post.";     // Show error on failure
+    }
+    exit;
+}
+
+/**
+ * Handle updating an existing post.
+ */
+function handleUpdate()
+{
+    // Only handle POST
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        header("Location: ../index.php");
+        exit;
+    }
+
+    // Sanitize inputs
+    $postId   = sanitizeInput($_POST['id']      ?? '');
+    $title    = sanitizeInput($_POST['title']   ?? '');
+    $content  = sanitizeInput($_POST['content'] ?? '');
+    $authorId = $_SESSION['user']['id'];
+
+    // Optional new hero image
+    $heroPath = uploadFile($_FILES['hero_image'] ?? null, '../uploads/post/');
+
+    // Load DOM & find the post node
+    $dom   = loadPostDOM();
+    $xpath = new DOMXPath($dom);
+    $post  = $xpath
+        ->query(sprintf("//post[id/text()='%s']", $postId))
+        ->item(0);
+
+    // If post missing or user not author, abort
+    if (!$post) {
+        header("Location: ../views/profile.php?error=postnotfound");
+        exit;
+    }
+    if ($xpath->query("author_id", $post)->item(0)->nodeValue !== $authorId) {
+        header("Location: ../views/profile.php?error=unauthorized");
+        exit;
+    }
+
+    // Update <title> and <content>
+    $xpath->query("title",   $post)->item(0)->nodeValue   = $title;
+    $xpath->query("content", $post)->item(0)->nodeValue   = $content;
+
+    // Update or append <hero_image>
+    if ($heroPath) {
+        $imgNodes = $xpath->query("hero_image", $post);
+        if ($imgNodes->length) {
+            $imgNodes->item(0)->nodeValue = $heroPath;
         } else {
-            echo "Failed to create post.";
+            $post->appendChild($dom->createElement("hero_image", $heroPath));
         }
-        exit;
     }
+
+    // Save changes and return to profile
+    savePostDOM($dom);
+    header("Location: ../views/profile.php?updated=1");
+    exit;
 }
 
-// ----------------------------------------------------------------------
-// Update: Update an existing post using the DOM-based post model.
-// ----------------------------------------------------------------------
-elseif ($action === 'update') {
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $postId = sanitizeInput($_POST['id'] ?? '');
-        $title = sanitizeInput($_POST['title'] ?? '');
-        $content = sanitizeInput($_POST['content'] ?? '');
-        $authorId = $_SESSION['user']['id'];
-        
-        // Handle file upload for a new hero image, if provided.
-        $heroImagePath = '';
-        if (isset($_FILES['hero_image']) && $_FILES['hero_image']['error'] == 0) {
-            $uploadDir = '../uploads/post/';
-            if (!file_exists($uploadDir)) {
-                mkdir($uploadDir, 0777, true);
-            }
-            $filename   = time() . '_' . basename($_FILES['hero_image']['name']);
-            $targetFile = $uploadDir . $filename;
-            if (move_uploaded_file($_FILES['hero_image']['tmp_name'], $targetFile)) {
-                $heroImagePath = 'uploads/post/' . $filename;
-            }
-        }
-        
-        // Load the posts DOM.
-        $dom = loadPostDOM();
-        $xpath = new DOMXPath($dom);
-        
-        // Locate the post by id.
-        $query = sprintf("//post[id/text()='%s']", $postId);
-        $postNode = $xpath->query($query)->item(0);
-        if (!$postNode) {
-            header("Location: ../views/profile.php?error=postnotfound");
-            exit;
-        }
-        
-        // Check if the current user is the owner of the post.
-        $authorNode = $xpath->query("author_id", $postNode)->item(0);
-        if ((string)$authorNode->nodeValue !== $authorId) {
-            header("Location: ../views/profile.php?error=unauthorized");
-            exit;
-        }
-        
-        // Update the title.
-        $titleNode = $xpath->query("title", $postNode)->item(0);
-        if ($titleNode) {
-            $titleNode->nodeValue = $title;
-        }
-        
-        // Update the content.
-        $contentNode = $xpath->query("content", $postNode)->item(0);
-        if ($contentNode) {
-            $contentNode->nodeValue = $content;
-        }
-        
-        // Update the hero image if a new one was uploaded.
-        if (!empty($heroImagePath)) {
-            $heroImageNodes = $xpath->query("hero_image", $postNode);
-            if ($heroImageNodes->length > 0) {
-                $heroImageNodes->item(0)->nodeValue = $heroImagePath;
-            } else {
-                $newImageNode = $dom->createElement("hero_image", $heroImagePath);
-                $postNode->appendChild($newImageNode);
-            }
-        }
-        
-        // Save the updated post XML.
-        savePostDOM($dom);
-        header("Location: ../views/profile.php?updated=1");
+/**
+ * Handle deletion of a post.
+ */
+function handleDelete()
+{
+    // Ensure we have a post_id query parameter
+    if (!isset($_GET['post_id'])) {
+        header("Location: ../index.php");
         exit;
     }
-}
+    $postId = sanitizeInput($_GET['post_id']);
+    $post   = getPostById($postId);  // Returns DOMElement or null
 
-// ----------------------------------------------------------------------
-// Delete: Delete a post (only if the logged in user is the owner).
-// ----------------------------------------------------------------------
-elseif ($action === 'delete') {
-    if (isset($_GET['post_id'])) {
-        $postId = sanitizeInput($_GET['post_id']);
-        
-        // Retrieve the post using the DOM-based model.
-        $postNode = getPostById($postId);
-        if ($postNode) {
-            $xpath = new DOMXPath($postNode->ownerDocument);
-            $authorNode = $xpath->query("author_id", $postNode)->item(0);
-            
-            // Only delete if the current user is the author.
-            if ((string)$authorNode->nodeValue === $_SESSION['user']['id']) {
-                deletePost($postId);
-            }
+    if ($post) {
+        // Verify current user is the author before deleting
+        $xpath      = new DOMXPath($post->ownerDocument);
+        $authorNode = $xpath->query("author_id", $post)->item(0);
+        if ($authorNode->nodeValue === $_SESSION['user']['id']) {
+            deletePost($postId);
         }
-        
-        header("Location: ../views/profile.php");
-        exit;
     }
+
+    // Redirect back to profile
+    header("Location: ../views/profile.php");
+    exit;
 }
 
-// Fallback: redirect to home if no valid action is provided.
-else {
+/**
+ * Helper: move uploaded file to destination dir.
+ * Returns relative path on success, or empty string on failure.
+ */
+function uploadFile($file, $destDir)
+{
+    if (!$file || $file['error'] !== UPLOAD_ERR_OK) {
+        return '';
+    }
+    // Create directory if missing
+    if (!is_dir($destDir)) {
+        mkdir($destDir, 0777, true);
+    }
+    // Build unique filename
+    $filename   = time() . '_' . basename($file['name']);
+    $targetFile = $destDir . $filename;
+
+    // Move uploaded file and return its public path
+    return move_uploaded_file($file['tmp_name'], $targetFile)
+        ? 'uploads/post/' . $filename
+        : '';
+}
+
+/**
+ * Dispatch mapping: action → handler function
+ */
+$action   = $_POST['action'] ?? $_GET['action'] ?? '';
+$handlers = [
+    'vote'   => 'handleVote',
+    'create' => 'handleCreate',
+    'update' => 'handleUpdate',
+    'delete' => 'handleDelete',
+];
+
+// Call the appropriate handler, or default to home
+if (isset($handlers[$action])) {
+    $handlers[$action]();
+} else {
     header("Location: ../index.php");
     exit;
 }
-?>
+
